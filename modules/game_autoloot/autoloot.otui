@@ -1,0 +1,385 @@
+PurchaseComplete < Window
+  id: purchaseComplete
+  size: 200 90
+  !text: tr("Purchase Complete!")
+  anchors.centerIn: parent
+  @onEscape: self:destroy()
+
+  Label
+    id: purchaseLabel
+    anchors.top: parent.top
+    anchors.horizontalCenter: parent.horizontalCenter
+    text: Thank you for your purchase!
+
+  Button
+    id: closeButton
+    !text: tr('Close')
+    width: 50
+    anchors.bottom: parent.bottom
+    anchors.horizontalCenter: parent.horizontalCenter
+    @onClick: self:getParent():destroy()
+
+BuySlotsWindow < Window
+  id: buySlotsWindow
+  size: 240 130
+  !text: tr("Purchase Extra Slots")
+  anchors.centerIn: parent
+  @onEscape: self:destroy()
+
+  Label
+    id: titleLabel
+    text: Select Amount of Slots
+    anchors.top: parent.top
+    anchors.horizontalCenter: parent.horizontalCenter
+
+  HorizontalScrollBar
+    id: amountScrollbar
+    anchors.top: titleLabel.bottom
+    anchors.left: parent.left
+    anchors.right: parent.right
+    margin-top: 10
+    minimum: 1
+    maximum: 99
+    step: 1
+
+  Label
+    id: amountLabel
+    anchors.top: amountScrollbar.bottom
+    anchors.horizontalCenter: amountScrollbar.horizontalCenter
+    margin-top: 10
+    text-auto-resize: true
+    &baseText: '%d Slots for %d Premium Points'
+
+  Button
+    id: buyButton
+    !text: tr('Buy')
+    width: 80
+    anchors.bottom: parent.bottom
+    anchors.left: parent.left
+    margin-left: 15
+
+  Button
+    id: cancelButton
+    !text: tr('Cancel')
+    width: 80
+    anchors.bottom: parent.bottom
+    anchors.right: parent.right
+    margin-right: 15
+    @onClick: self:getParent():hide()
+
+AutoLootScrollBar < UIScrollBar
+  orientation: vertical
+  width: 10
+  height: 65
+  image-source: /images/game/autoloot/scroll_bar
+  pixels-scroll: true
+
+  UIButton
+    id: decrementButton
+
+  UIButton
+    id: incrementButton
+
+  UIButton
+    id: sliderButton
+    anchors.centerIn: parent
+    size: 4 24
+    image-source: /images/game/autoloot/scroll_handle
+    opacity: 0.5
+    visible: true
+    $disabled:
+      visible: false
+
+  Label
+    id: valueLabel
+
+AddItemWindow < Window
+  id: addItemWindow
+  size: 240 100
+  !text: tr("Add Item")
+  anchors.centerIn: parent
+  @onEnter: modules.game_autoloot.AutoLoot.addItemButton()
+  @onEscape: self:destroy()
+
+  TextEdit
+    id: itemText
+    anchors.top: parent.top
+    anchors.left: parent.left
+    anchors.right: parent.right
+    margin-top: 4
+    placeholder: Item Name or ID
+
+  Button
+    id: addButton
+    !text: tr('Add')
+    width: 60
+    anchors.bottom: parent.bottom
+    anchors.left: parent.left
+    margin-left: 40
+    @onClick: modules.game_autoloot.AutoLoot.addItemButton()
+
+  Button
+    id: closeButton
+    !text: tr('Close')
+    width: 60
+    anchors.bottom: parent.bottom
+    anchors.right: parent.right
+    margin-right: 40
+    @onClick: self:getParent():hide()
+
+AutoLootButtonLarge < UIButton
+  size: 112 34
+  image-source: /images/game/autoloot/largeButtons
+  color: #d8c1b5
+
+AutoLootLabel < Label
+  color: #d8c1b5
+
+AutoLootEntry < UIWidget
+  id: autolootEntry
+  height: 47
+  background-color: alpha
+  image-source:
+  $focus:
+    image-source: /images/game/autoloot/focusEffect
+
+  UIWidget
+    id: autolootItemFrame
+    size: 32 32
+    image-source: /images/game/autoloot/itemFrame
+    anchors.top: parent.top
+    anchors.left: parent.left
+    margin-top: 9
+    margin-left: 22
+
+  UIItem
+    id: autolootItem
+    size: 32 32
+    anchors.horizontalCenter: autolootItemFrame.horizontalCenter
+    anchors.verticalCenter: autolootItemFrame.verticalCenter
+    phantom: true
+    focusable: false
+
+  Label
+    id: autolootName
+    color: #d8c1b5
+    anchors.top: autolootItemFrame.top
+    anchors.left: autolootItemFrame.right
+    font: libelsuit-15px_bold_cp1252
+    text-auto-resize: true
+    margin-top: 2
+    margin-left: 10
+
+  Label
+    id: autolootWeight
+    anchors.top: prev.bottom
+    anchors.left: prev.left
+    font: small-9px
+    color: white
+    &baseText: 'WEIGHT: %s'
+
+  UIButton
+    id: autolootButton
+    image-source: /images/game/autoloot/smallButtons
+    size: 86 30
+    image-clip: 0 90 86 30
+    anchors.verticalCenter: parent.verticalCenter
+    anchors.right: parent.right
+    margin-right: 21
+    @onClick: modules.game_autoloot.AutoLoot.toggleEntry(self:getParent())
+    $on:
+      image-clip: 0 60 86 30
+    $hover on:
+      image-clip: 86 60 86 30
+    $hover !on:
+      image-clip: 86 90 86 30
+
+UIWindow
+  id: autolootWindow
+  size: 344 519
+  image-source: /images/game/autoloot/mainWindow
+  anchors.horizontalCenter: parent.horizontalCenter
+  anchors.verticalCenter: parent.verticalCenter
+  @onEnter: modules.game_autoloot.AutoLoot.toggleEntry(self:recursiveGetChildById('itemEntries'):getFocusedChild())
+  @onEscape: modules.game_autoloot.AutoLoot.destroy()
+  @onSetup: |
+    g_keyboard.bindKeyPress('Up', function() self:recursiveGetChildById('itemEntries'):focusPreviousChild(KeyboardFocusReason) end, self)
+    g_keyboard.bindKeyPress('Down', function() self:recursiveGetChildById('itemEntries'):focusNextChild(KeyboardFocusReason) end, self)  
+
+  UIButton
+    id: closeButton
+    size: 25 25
+    image-source: /images/game/autoloot/closeButton
+    image-clip: 0 0 25 25
+    anchors.top: parent.top
+    anchors.right: parent.right
+    margin-top: 8
+    margin-right: 8
+    @onClick: modules.game_autoloot.AutoLoot.destroy()
+    $hover:
+      image-clip: 0 25 25 25
+    $pressed:
+      image-clip: 0 50 25 25
+
+  Panel
+    id: slotsBackground
+    size: 114 22
+    anchors.top: closeButton.top
+    anchors.right: closeButton.right
+    margin-top: 2
+    margin-right: 38
+    image-source: /images/game/autoloot/slotsBackground
+
+    Panel
+      id: slotsGroup
+      size: 45 20
+      anchors.top: parent.top
+      anchors.left: parent.left
+      margin-top: 1
+      margin-left: 3
+      phantom: false
+
+      UIWidget
+        id: slotsIcon
+        size: 20 20
+        anchors.top: parent.top
+        anchors.left: parent.left
+        image-source: /images/game/autoloot/slotsIcon
+        phantom: true
+
+      Label
+        id: slotsAmount
+        size: 20 20
+        anchors.verticalCenter: parent.verticalCenter
+        anchors.left: slotsIcon.right
+        margin-left: 5
+        font: verdana-11px-antialised
+        text-auto-resize: true
+        color: #a3deff
+        text: 4
+
+    UIButton
+      id: slotsButton
+      size: 60 20
+      anchors.top: parent.top
+      anchors.right: parent.right
+      margin-top: 1
+      margin-right: 1
+      image-source: /images/game/autoloot/slotsButton
+      image-clip: 0 0 60 20
+      @onClick: modules.game_autoloot.AutoLoot.buySlots()
+      $hover: 
+        image-clip: 0 20 60 20
+
+  Panel
+    id: listPanel
+    size: 321 285
+    image-source: /images/game/autoloot/listBackground
+    anchors.top: parent.top
+    anchors.left: parent.left
+    anchors.right: parent.right
+    margin-top: 48
+    margin-left: 11
+    margin-right: 12
+
+    TextList
+      id: itemEntries
+      anchors.top: parent.top
+      anchors.left: parent.left
+      anchors.right: listScrollbar.left
+      anchors.bottom: parent.bottom
+      border-color: alpha
+      background-color: alpha
+      margin: 2
+      focusable: false
+      vertical-scrollbar: listScrollbar
+      auto-focus: first
+
+    AutoLootScrollBar
+      id: listScrollbar
+      anchors.top: parent.top
+      anchors.bottom: parent.bottom
+      anchors.right: parent.right
+      margin-top: 2
+      margin-bottom: 2
+      step: 14
+
+  Panel
+    id: skinPanel
+    size: 233 98
+    anchors.top: listPanel.bottom
+    anchors.horizontalCenter: parent.horizontalCenter
+    margin-top: 15
+
+    UIButton
+      id: arrowLeft
+      image-source: /images/game/autoloot/arrowLeft
+      anchors.verticalCenter: parent.verticalCenter
+      anchors.left: parent.left
+      opacity: 0.7
+      $hover:
+        opacity: 1
+      @onClick: modules.game_autoloot.AutoLoot.cycleSkins("left")
+
+    Panel
+      id: skinBackground
+      image-source: /images/game/autoloot/skinBackground
+      anchors.horizontalCenter: parent.horizontalCenter
+
+      AutoLootLabel
+        id: skinLabel
+        anchors.top: parent.top
+        anchors.left: parent.left
+        anchors.right: parent.right
+        text-align: center
+        margin-top: 7
+
+      UICreature
+        id: skinCreature
+        anchors.centerIn: parent
+        margin-top: 10
+        size: 48 48
+        phantom: true
+        outfit-center: true
+        old-scaling: true
+
+    UIButton
+      id: arrowRight
+      image-source: /images/game/autoloot/arrowRight
+      anchors.verticalCenter: parent.verticalCenter
+      anchors.right: parent.right
+      opacity: 0.7
+      $hover:
+        opacity: 1
+      @onClick: modules.game_autoloot.AutoLoot.cycleSkins("right")
+
+  AutoLootButtonLarge
+    id: addButton
+    anchors.top: removeButton.top
+    anchors.right: removeButton.left
+    image-clip: 0 170 112 34
+    @onClick: modules.game_autoloot.AutoLoot.addEntry()
+    $hover:
+      image-clip: 112 170 112 34
+
+  AutoLootButtonLarge
+    id: removeButton
+    anchors.bottom: parent.bottom
+    anchors.horizontalCenter: parent.horizontalCenter
+    margin-bottom: 19
+    image-clip: 0 204 112 34
+    $hover:
+      image-clip: 112 204 112 34
+
+  AutoLootButtonLarge
+    id: activateButton
+    anchors.top: removeButton.top
+    anchors.left: removeButton.right
+    image-clip: 0 136 112 34
+    @onClick: self:setOn(not self:isOn())
+    $on:
+      image-clip: 0 102 112 34
+    $hover on:
+      image-clip: 112 102 112 34
+    $hover !on:
+      image-clip: 112 136 112 34

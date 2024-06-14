@@ -96,6 +96,9 @@ public:
     void clearTitle() { setTitle("", "", Color::white); }
     std::string getTitle() { return m_titleCache.getText(); }
 
+    bool isAutoLooter() { return m_autoLooter; }
+    void setAutoLooter(bool autoLooter) { m_autoLooter = autoLooter; }
+
     uint32 getId() { return m_id; }
     std::string getName() { return m_name; }
     uint8 getHealthPercent() { return m_healthPercent; }
@@ -223,6 +226,7 @@ protected:
     uint8 m_shield;
     uint8 m_emblem;
     uint8 m_type;
+    bool m_autoLooter;
     uint8 m_icon;
     TexturePtr m_skullTexture;
     TexturePtr m_shieldTexture;

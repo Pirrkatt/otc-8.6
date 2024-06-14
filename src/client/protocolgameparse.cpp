@@ -3482,6 +3482,7 @@ CreaturePtr ProtocolGame::getCreature(const InputMessagePtr& msg, int type)
             msg->getU8();
         int skull = msg->getU8();
         int shield = msg->getU8();
+        bool autoLooter = msg->getU8();
 
         // emblem is sent only when the creature is not known
         int8 emblem = -1;
@@ -3537,6 +3538,7 @@ CreaturePtr ProtocolGame::getCreature(const InputMessagePtr& msg, int type)
             creature->setShield(shield);
             creature->setPassable(!unpass);
             creature->setLight(light);
+            creature->setAutoLooter(autoLooter);
 
             if (emblem != -1)
                 creature->setEmblem(emblem);

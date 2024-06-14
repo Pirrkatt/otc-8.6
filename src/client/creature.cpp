@@ -61,6 +61,7 @@ Creature::Creature() : Thing()
     m_shield = Otc::ShieldNone;
     m_emblem = Otc::EmblemNone;
     m_type = Proto::CreatureTypeUnknown;
+    m_autoLooter = false;
     m_icon = Otc::NpcIconNone;
     m_lastStepDirection = Otc::InvalidDirection;
     m_footLastStep = 0;
@@ -200,7 +201,7 @@ void Creature::drawInformation(const Point& point, bool useGray, const Rect& par
     if (g_game.getFeature(Otc::GameBlueNpcNameColor) && isNpc() && m_healthPercent == 100 && !useGray)
         fillColor = Color(0x66, 0xcc, 0xff);
 
-    if (drawFlags & Otc::DrawBars && (!isNpc() || !g_game.getFeature(Otc::GameHideNpcNames))) {
+    if (drawFlags & Otc::DrawBars && (!isNpc() || !g_game.getFeature(Otc::GameHideNpcNames)) && !isAutoLooter()) {
         if (healthBar) {
             TexturePtr barTexture = healthBar->getTexture();
             Rect barRect = Rect(backgroundRect.x() + healthBar->getOffset().x, backgroundRect.y() + healthBar->getOffset().y, barTexture->getSize());

@@ -443,6 +443,7 @@ function createThingMenu(menuPosition, lookThing, useThing, creatureThing)
   if lookThing and not lookThing:isCreature() and not lookThing:isNotMoveable() and lookThing:isPickupable() then
     menu:addSeparator()
     menu:addOption(tr('Trade with ...'), function() startTradeWith(lookThing) end)
+    menu:addOption(tr('Add to AutoLoot'), function() g_game.openAutoLootWindow() modules.game_autoloot.sendAction('addItem', tostring(lookThing:getId())) end)
   end
 
   if lookThing then
@@ -466,7 +467,9 @@ function createThingMenu(menuPosition, lookThing, useThing, creatureThing)
           menu:addOption(tr('Dismount'), function() localPlayer:dismount() end)
         end
       end
-      
+
+      menu:addOption(tr('AutoLoot'), function() g_game.openAutoLootWindow() end)
+
       if g_game.getFeature(GamePrey) and modules.game_prey then
         menu:addOption(tr('Open Prey Dialog'), function() modules.game_prey.show() end)
       end

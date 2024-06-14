@@ -1,0 +1,9 @@
+Module
+  name: game_autoloot
+  description: AutoLoot System with Summons
+  author: Pirrkatt
+  website: 
+  sandboxed: true
+  scripts: [ autoloot ]
+  @onLoad: init()
+  @onUnload: terminate()
