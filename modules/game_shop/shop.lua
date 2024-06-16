@@ -496,7 +496,7 @@ function selectOffer(widget, focused)
       return
     end
 
-    selectedOffer = {category=category, buyCount=1, offer=offer, title=item.title, cost=item.cost, id=widget.offerId}
+    selectedOffer = {category=category, stackCount=item.count, buyCount=1, offer=offer, title=item.title, cost=item.cost, id=widget.offerId}
     selectedWindow = g_ui.createWidget('SelectedOverlay', shop)
 	  selectedWindow:recursiveGetChildById('selectedTitle'):setText(selectedOffer.title)
 
@@ -513,13 +513,12 @@ function selectOffer(widget, focused)
         local itemId = itemOverlay:recursiveGetChildById('item')
         local itemCount = itemOverlay:recursiveGetChildById('itemCount')
         itemId:setItemId(item["item"])
-        itemId:setItemCount(1)
+        itemId:setItemCount(selectedOffer.stackCount)
         itemId:setShowCount(false)
         itemCount:setText('X1')
         scrollbar = itemOverlay:getChildById('horizontalScroll')
         scrollbar.onValueChange = function()
           itemCount:setText(string.format('X%d', scrollbar:getValue()))
-          itemId:setItemCount(scrollbar:getValue())
           priceText:setText(selectedOffer.cost * scrollbar:getValue())
           selectedOffer.buyCount = scrollbar:getValue()
         end
@@ -556,7 +555,7 @@ function buyConfirmed(buyData)
   if not selectedWindow then
     return
   end
-  
+
   selectedWindow:destroy()
   selectedWindow = nil
   sendAction("buy", buyData)

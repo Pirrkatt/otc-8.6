@@ -1,4 +1,4 @@
-ShopCategory < Panel
+ShopCategory < UIButton
   size: 84 29
   anchors.top: parent.top
   anchors.left: prev.right
@@ -12,6 +12,8 @@ ShopOffer < UIButton
   image-clip: 0 0 111 116
   focusable: true
 
+  $hover:
+    image-clip: 222 0 111 116
   $focus:
     image-clip: 111 0 111 116
 
@@ -345,7 +347,7 @@ UIWindow
   image-source: /images/game/shop/mainWindow
   anchors.horizontalCenter: parent.horizontalCenter
   anchors.verticalCenter: parent.verticalCenter
-  draggable: false
+  draggable: true
   @onEscape: modules.game_shop.hide()
 
   Panel
@@ -362,6 +364,8 @@ UIWindow
       margin: 0
       image-clip: 0 0 84 29
 
+      $hover:
+        image-clip: 0 58 84 29
       $focus:
         image-clip: 0 29 84 29
 
@@ -369,6 +373,8 @@ UIWindow
       id: outfitCategory
       image-clip: 84 0 84 29
 
+      $hover:
+        image-clip: 84 58 84 29
       $focus:
         image-clip: 84 29 84 29
 
@@ -376,6 +382,8 @@ UIWindow
       id: specialCategory
       image-clip: 168 0 84 29
 
+      $hover:
+        image-clip: 168 58 84 29
       $focus:
         image-clip: 168 29 84 29
 
@@ -383,6 +391,8 @@ UIWindow
       id: cosmeticsCategory
       image-clip: 252 0 84 29
 
+      $hover:
+        image-clip: 252 58 84 29
       $focus:
         image-clip: 252 29 84 29
 
@@ -390,6 +400,8 @@ UIWindow
       id: labelsCategory
       image-clip: 336 0 84 29
 
+      $hover:
+        image-clip: 336 58 84 29
       $focus:
         image-clip: 336 29 84 29
 
@@ -397,6 +409,8 @@ UIWindow
       id: aurasCategory
       image-clip: 420 0 84 29
 
+      $hover:
+        image-clip: 420 58 84 29
       $focus:
         image-clip: 420 29 84 29
 
@@ -404,6 +418,8 @@ UIWindow
       id: shadersCategory
       image-clip: 504 0 84 29
 
+      $hover:
+        image-clip: 504 58 84 29
       $focus:
         image-clip: 504 29 84 29
 
@@ -411,6 +427,8 @@ UIWindow
       id: furnitureCategory
       image-clip: 588 0 84 29
 
+      $hover:
+        image-clip: 588 58 84 29
       $focus:
         image-clip: 588 29 84 29
 
