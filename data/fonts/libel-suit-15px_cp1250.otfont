@@ -1,0 +1,6 @@
+Font
+  name: libel-suit-15px
+  texture: libel-suit-15px_cp1250
+  height: 18
+  glyph-size: 13 19
+  space-width: 4

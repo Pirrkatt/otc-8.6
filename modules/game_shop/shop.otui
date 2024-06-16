@@ -1,223 +1,447 @@
 ShopCategory < Panel
-  height: 36
+  size: 84 29
+  anchors.top: parent.top
+  anchors.left: prev.right
+  margin-left: 2
+  image-source: /images/game/shop/categoryButtons
   focusable: true
-  background: alpha
+
+ShopOffer < UIButton
+  size: 111 116
+  image-source: /images/game/shop/objectBackground
+  image-clip: 0 0 111 116
+  focusable: true
 
   $focus:
-    background: #99999999
-  
-  Label
-    id: name
+    image-clip: 111 0 111 116
+
+  Panel
+    id: titlePanel
     anchors.top: parent.top
     anchors.left: parent.left
     anchors.right: parent.right
-    anchors.bottom: parent.bottom
-    margin-left: 40
-    text-align: left
-    color: white
-    font: verdana-11px-rounded    
-    
-ShopCategoryItem < ShopCategory
-  UIItem
-    id: item
-    anchors.top: parent.top
-    anchors.left: parent.left
-    anchors.bottom: parent.bottom
-    margin-top: 2
-    margin-bottom: 2
-    margin-left: 2
-    virtual: true
-    size: 32 32
-    
-ShopCategoryCreature < ShopCategory
-  UICreature
-    id: creature
-    anchors.top: parent.top
-    anchors.left: parent.left
-    anchors.bottom: parent.bottom
-    margin-top: 2
-    margin-bottom: 2
-    margin-left: 2
-    size: 32 32
-    
-ShopCategoryImage < ShopCategory
-  Label
-    id: image
-    anchors.top: parent.top
-    anchors.left: parent.left
-    anchors.bottom: parent.bottom
-    margin-top: 2
-    margin-bottom: 2
-    margin-left: 2
-    size: 32 32    
-    
-    
-    
-ShopOffer < Panel
-  height: 56
-  background: alpha
-  
-  $focus:
-    background: #99999999
+    margin: 6
+    size: 100 26
+
+    Label
+      id: title
+      anchors.verticalCenter: parent.verticalCenter
+      anchors.left: parent.left
+      anchors.right: parent.right
+      text-wrap: true
+      text-auto-resize: true
+      text-align: center
+      color: #d8c1b5
+      font: libel-suit-rg-11px_cp1252
 
   Label
-    id: title
-    anchors.left: parent.left
-    anchors.right: parent.right
-    anchors.top: parent.top
-    margin-top: 4
-    margin-left: 55
-    text-align: topleft
-    color: white
-    font: verdana-11px-rounded
-
-  Label
-    id: description
-    anchors.top: prev.bottom
-    anchors.left: parent.left
-    anchors.right: parent.right
+    id: price
+    anchors.horizontalCenter: parent.horizontalCenter
     anchors.bottom: parent.bottom
-    margin-left: 55
-    margin-right: 55
-    text-align: topleft
-    text-auto-resize: true
-    text-wrap: true
-    color: white
-    font: verdana-11px-rounded
-    
-  Button
-    id: buyButton
-    text: BUY
-    height: 25
-    anchors.verticalCenter: parent.verticalCenter
-    anchors.left: prev.right
-    anchors.right: parent.right    
-    margin-right: 15
+    margin-bottom: 7
+    margin-left: 5
     text-align: center
-    
+    text-auto-resize: true
+    color: #db77ff
+    font: libel-suit-rg-11px_cp1252
+
+  UIWidget
+    id: priceIcon
+    size: 18 17
+    anchors.right: price.left
+    anchors.bottom: price.bottom
+    margin-bottom: -1
+    image-source: /images/game/shop/gemsIconSmall
+    phantom: true
+
 ShopOfferItem < ShopOffer
   UIItem
     id: item
-    anchors.top: parent.top
-    anchors.left: parent.left
-    anchors.bottom: parent.bottom
-    margin-top: 4
-    margin-bottom: 4
-    margin-left: 2
+    anchors.verticalCenter: parent.verticalCenter
+    anchors.horizontalCenter: parent.horizontalCenter
+    margin-top: 5
     virtual: true
     size: 48 48
+    phantom: true
     
 ShopOfferCreature < ShopOffer
   UICreature
     id: creature
-    anchors.top: parent.top
-    anchors.left: parent.left
-    anchors.bottom: parent.bottom
-    margin-top: 4
-    margin-bottom: 4
-    margin-left: 2
+    anchors.verticalCenter: parent.verticalCenter
+    anchors.horizontalCenter: parent.horizontalCenter
+    margin-top: 5
     size: 48 48
-    
-ShopOfferImage < ShopOffer
-  Label
-    id: image
-    anchors.top: parent.top
-    anchors.left: parent.left
-    anchors.bottom: parent.bottom
-    margin-top: 4
-    margin-bottom: 4
-    margin-left: 2
-    size: 48 48    
-  
-MainWindow
-  id: shopWindow
-  !text: tr('Shop')
-  size: 750 500
-  @onEscape: modules.game_shop.hide()
-  $mobile:
-    size: 500 360
+    phantom: true
 
-  Panel
-    id: infoPanel
-    anchors.top: parent.top
-    anchors.left: parent.left
-    width: 230
-    height: 60
+ShopScrollBar < UIScrollBar
+  orientation: vertical
+  width: 5
+  height: 65
+  image-source: /images/game/shop/scroll_bar
+  pixels-scroll: true
 
-    Label
-      id: points
-      anchors.horizontalCenter: parent.horizontalCenter
-      anchors.top: parent.top
-      margin-top: 10
-      text: -
-      text-auto-resize: true
-    
-    Button
-      id: buy
-      anchors.horizontalCenter: parent.horizontalCenter
-      width: 150
-      anchors.top: prev.bottom
-      margin-top: 10
+  UIButton
+    id: decrementButton
+
+  UIButton
+    id: incrementButton
+
+  UIButton
+    id: sliderButton
+    anchors.centerIn: parent
+    size: 4 24
+    image-source: /images/game/shop/scroll_handle
+    opacity: 0.5
+    visible: true
+    $disabled:
       visible: false
-      !text: tr("Buy points")
+
+  Label
+    id: valueLabel
+
+NicknameShopWindow < MainWindow
+  id: countWindow
+  !text: tr('Change your nickname')
+  size: 250 130
+  padding-top: 24
+
+  Label
+    id: countMessage
+    anchors.left: parent.left
+    anchors.right: parent.right
+    anchors.top: parent.top
+    phantom: true
+    margin-top: 2
+    text-align: center
+    text-auto-resize: true
+    focusable: true
+
+  TextEdit
+    id: newName
+    anchors.left: parent.left
+    anchors.right: parent.right
+    anchors.top: countMessage.bottom
+    phantom: true
+    margin-top: 2
+    text-align: center
+    focusable: true
+
+  Label
+    id: countMessagePoints
+    anchors.left: parent.left
+    anchors.right: parent.right
+    anchors.top: newName.bottom
+    phantom: true
+    margin-top: 2
+    text-align: center
+    text-auto-resize: true
+    focusable: true
+
+  Button
+    id: buttonCancel
+    !text: tr('Cancel')
+    height: 20
+    anchors.left: newName.horizontalCenter
+    anchors.right: newName.right
+    anchors.top: countMessagePoints.bottom
+    margin-top: 7
+    focusable: false
+
+  Button
+    id: buttonOk
+    !text: tr('Ok')
+    height: 20
+    anchors.right: newName.horizontalCenter
+    anchors.left: newName.left
+    anchors.top: countMessagePoints.bottom
+    margin-top: 7
+    margin-right: 6
+    focusable: false    
+
+SelectedOverlay < UIWindow
+  id: overlay
+  anchors.left: parent.left
+  anchors.right: parent.right
+  anchors.top: parent.top
+  anchors.bottom: parent.bottom
+  image-source: /images/game/shop/overlay
 
   Panel
-    id: adPanel
-    anchors.top: parent.top
-    anchors.left: infoPanel.right
-    anchors.right: parent.right
-    margin-left: 10
-    height: 0
+    id: selectedBackground
+    size: 162 205
+    anchors.horizontalCenter: parent.horizontalCenter
+    anchors.verticalCenter: parent.verticalCenter
+    margin-top: 50
+    image-source: /images/game/shop/selectedBackground
+
+    Panel
+      id: titleBackground
+      size: 162 22
+      margin-left: 5
+      margin-top: 4
+      margin-right: 5
+      anchors.top: parent.top
+      anchors.left: parent.left
+      anchors.right: parent.right
+
+      Label
+        id: selectedTitle
+        anchors.verticalCenter: parent.verticalCenter
+        anchors.left: parent.left
+        anchors.right: parent.right
+        text-wrap: true
+        text-auto-resize: true
+        text-align: center
+        color: #d8c1b5
+        font: libel-suit-rg-11px_cp1252
     
     Label
-      id: ad
+      id: selectedPrice
       anchors.horizontalCenter: parent.horizontalCenter
-      anchors.top: parent.top
-      anchors.bottom: parent.bottom
-      text-auto-resize: true
-      text-wrap: true
+      anchors.bottom: buyButton.top
+      margin-bottom: 5
+      margin-left: 10
       text-align: center
-      font: sans-bold-16px
-  
-  TextList    
-    id: categories
-    vertical-scrollbar: categoriesScrollBar
-    anchors.top: infoPanel.bottom
-    anchors.left: infoPanel.left
-    anchors.right: infoPanel.right
-    anchors.bottom: transactionHistory.top
-    margin-top: 10
-    margin-bottom: 10
-    padding: 1
-    focusable: false
+      text-auto-resize: true
+      color: #db77ff
+      font: libel-suit-rg-11px_cp1252
 
-  VerticalScrollBar
-    id: categoriesScrollBar
-    anchors.top: categories.top
-    anchors.bottom: categories.bottom
-    anchors.right: categories.right
-    step: 50
-    pixels-scroll: true
+    UIWidget
+      id: selectedPriceIcon
+      size: 20 22
+      anchors.right: selectedPrice.left
+      anchors.verticalCenter: selectedPrice.verticalCenter
+      margin-right: 4
+      image-source: /images/game/shop/gemsIcon
+      phantom: true
 
-  TextList
+    UIButton
+      id: buyButton
+      size: 150 31
+      anchors.bottom: parent.bottom
+      anchors.horizontalCenter: parent.horizontalCenter
+      margin-bottom: 6
+      image-source: /images/game/shop/buyButton
+      image-clip: 0 0 150 31
+      $hover: 
+        image-clip: 0 31 150 31
+
+  UIButton
+    id: closeButton
+    size: 25 25
+    image-clip: 0 0 25 25
+    anchors.top: selectedBackground.top
+    anchors.right: selectedBackground.right
+    image-source: /images/game/shop/closeButton
+    margin-top: -6
+    margin-right: -6
+    @onClick: modules.game_shop.buyCanceled()
+    $hover:
+      image-clip: 0 25 25 25
+    $pressed:
+      image-clip: 0 50 25 25
+
+HorizontalScroll < UIScrollBar
+  orientation: horizontal
+  size: 152 5
+  image-source: /images/game/shop/horizontal_scroll
+
+  UIButton
+    id: decrementButton
+
+  UIButton
+    id: incrementButton
+
+  UIButton
+    id: sliderButton
+    anchors.centerIn: parent
+    size: 24 4
+    image-source: /images/game/shop/horizontal_handle
+    opacity: 0.5
+    visible: true
+    $disabled:
+      visible: false
+
+  Label
+    id: valueLabel
+
+OverlayItem < Panel
+  id: overlayItem
+  size: 152 117
+  anchors.left: parent.left
+  anchors.top: parent.top
+  margin-left: 5
+  margin-top: 26
+
+  UIItem
+    id: item
+    anchors.verticalCenter: parent.verticalCenter
+    anchors.horizontalCenter: parent.horizontalCenter
+    virtual: true
+    size: 48 48
+
+    Label
+      id: itemCount
+      anchors.top: parent.top
+      anchors.right: parent.right
+      margin-top: -10
+      margin-right: -14
+      text-auto-resize: true
+      horizontal-scrollbar: horizontalScroll
+
+  HorizontalScroll
+    id: horizontalScroll
+    anchors.bottom: parent.bottom
+    anchors.right: parent.right
+    anchors.left: parent.left
+    step: 10
+    minimum: 1
+    maximum: 100
+
+OverlayOutfit < UICreature
+  id: overlayCreature
+  anchors.verticalCenter: parent.verticalCenter
+  anchors.horizontalCenter: parent.horizontalCenter
+  size: 48 48 
+  margin-bottom: 15
+
+NoPointsOverlay < Panel
+  id: noPointsPanel
+  size: 162 205
+  anchors.top: parent.top
+  anchors.left: parent.left
+
+  Panel
+    id: noPointsOverlay
+    size: 152 173
+    image-source: /images/game/shop/notEnoughPoints
+    anchors.top: parent.top
+    anchors.left: parent.left
+    margin-left: 5
+    margin-top: 4
+
+  UIButton
+    id: okButton
+    size: 150 31
+    anchors.bottom: parent.bottom
+    anchors.horizontalCenter: parent.horizontalCenter
+    margin-bottom: 6
+    image-source: /images/game/shop/buyButton
+    image-clip: 150 0 150 31
+    $hover: 
+      image-clip: 150 31 150 31
+
+ImageEffect < Panel
+  id: imageEffect
+  size: 152 117
+  anchors.left: parent.left
+  anchors.top: parent.top
+  margin-left: 5
+  margin-top: 26
+
+UIWindow
+  id: shopWindow
+  size: 697 519
+  image-source: /images/game/shop/mainWindow
+  anchors.horizontalCenter: parent.horizontalCenter
+  anchors.verticalCenter: parent.verticalCenter
+  draggable: false
+  @onEscape: modules.game_shop.hide()
+
+  Panel
+    id: categoryPanel
+    size: 679 29
+    anchors.top: parent.top
+    anchors.left: parent.left
+    margin-left: 9
+    margin-top: 40
+
+    ShopCategory
+      id: itemCategory
+      anchors.left: parent.left
+      margin: 0
+      image-clip: 0 0 84 29
+
+      $focus:
+        image-clip: 0 29 84 29
+
+    ShopCategory
+      id: outfitCategory
+      image-clip: 84 0 84 29
+
+      $focus:
+        image-clip: 84 29 84 29
+
+    ShopCategory
+      id: specialCategory
+      image-clip: 168 0 84 29
+
+      $focus:
+        image-clip: 168 29 84 29
+
+    ShopCategory
+      id: cosmeticsCategory
+      image-clip: 252 0 84 29
+
+      $focus:
+        image-clip: 252 29 84 29
+
+    ShopCategory
+      id: labelsCategory
+      image-clip: 336 0 84 29
+
+      $focus:
+        image-clip: 336 29 84 29
+
+    ShopCategory
+      id: aurasCategory
+      image-clip: 420 0 84 29
+
+      $focus:
+        image-clip: 420 29 84 29
+
+    ShopCategory
+      id: shadersCategory
+      image-clip: 504 0 84 29
+
+      $focus:
+        image-clip: 504 29 84 29
+
+    ShopCategory
+      id: furnitureCategory
+      image-clip: 588 0 84 29
+
+      $focus:
+        image-clip: 588 29 84 29
+
+  HorizontalList
     id: offers
+    anchors.left: parent.left
+    anchors.right: parent.right
+    anchors.top: parent.top
+    anchors.bottom: parent.bottom
+    margin-left: 11
+    margin-right: 15
+    margin-top: 80
+    margin-bottom: 13
+    background-color: alpha
+    border-color: alpha
     vertical-scrollbar: offersScrollBar
-    anchors.top: adPanel.bottom
-    anchors.left: adPanel.left
-    anchors.right: adPanel.right
-    anchors.bottom: transactionHistory.top
-    margin-top: 10
-    margin-bottom: 10
-    padding: 1
-    focusable: false
+    layout:
+      type: grid
+      cell-size: 111 116
+      cell-spacing: 1
+      num-columns: 6
+      num-lines: 20
 
-  VerticalScrollBar
+  ShopScrollBar
     id: offersScrollBar
     anchors.top: offers.top
     anchors.bottom: offers.bottom
     anchors.right: offers.right
-    step: 50
-    pixels-scroll: true
+    margin-right: -5
+    margin-top: -7
+    step: 27
 
   Button
     id: transactionHistory
@@ -226,20 +450,127 @@ MainWindow
     anchors.left: parent.left
     anchors.bottom: parent.bottom
     @onClick: modules.game_shop.showHistory()
+    visible: false
 
-  Button
-    id: transferOpen
-    !text: tr('Transfer Coins')
-    width: 128
-    anchors.left: prev. right
-    margin-left: 10
-    anchors.verticalCenter: prev.verticalCenter
-    @onClick: modules.game_shop.showTransfer()
-
-  Button
-    id: buttonCancel
-    !text: tr('Close')
-    width: 64
+  UIButton
+    id: closeButton
+    size: 25 25
+    image-source: /images/game/shop/closeButton
+    image-clip: 0 0 25 25
+    anchors.top: parent.top
     anchors.right: parent.right
-    anchors.bottom: parent.bottom
+    margin-top: 8
+    margin-right: 8
     @onClick: modules.game_shop.hide()
+    $hover:
+      image-clip: 0 25 25 25
+    $pressed:
+      image-clip: 0 50 25 25
+
+  UIButton
+    id: changeNameButton
+    size: 88 22
+    anchors.verticalCenter: closeButton.verticalCenter
+    anchors.right: closeButton.left
+    margin-right: 10
+    image-source: /images/game/shop/changeNameButton
+    image-clip: 0 0 88 22
+    @onClick: modules.game_shop.NicknameShopWindow()
+    $hover: 
+      image-clip: 0 22 88 22
+
+  Panel
+    id: wardrobePanel
+    size: 114 22
+    anchors.verticalCenter: closeButton.verticalCenter
+    anchors.right: changeNameButton.left
+    margin-right: 10
+    image-source: /images/game/shop/panelBackground
+
+    Panel
+      id: wardrobeGroup
+      size: 45 20
+      anchors.top: parent.top
+      anchors.left: parent.left
+      margin-top: 1
+      margin-left: 3
+      phantom: false
+
+      UIWidget
+        id: wardrobeIcon
+        size: 20 20
+        anchors.top: parent.top
+        anchors.left: parent.left
+        image-source: /images/game/shop/slotsIcon
+        phantom: true
+
+      Label
+        id: wardrobeAmount
+        size: 20 20
+        anchors.verticalCenter: parent.verticalCenter
+        anchors.left: wardrobeIcon.right
+        margin-left: 6
+        font: libel-suit-rg-11px_cp1252
+        text-auto-resize: true
+        color: #a3deff
+        text: 4
+
+    UIButton
+      id: wardrobeButton
+      size: 60 20
+      anchors.top: parent.top
+      anchors.right: parent.right
+      margin-top: 1
+      margin-right: 1
+      image-source: /images/game/shop/wardrobeButton
+      image-clip: 0 0 60 20
+      @onClick: print('wardrobeButton - No function yet')
+      $hover: 
+        image-clip: 0 20 60 20
+
+  Panel
+    id: gemsPanel
+    size: 114 22
+    anchors.verticalCenter: closeButton.verticalCenter
+    anchors.right: wardrobePanel.left
+    margin-right: 10
+    image-source: /images/game/shop/panelBackground
+
+    Panel
+      id: gemsGroup
+      size: 45 20
+      anchors.top: parent.top
+      anchors.left: parent.left
+      margin-left: 3
+      phantom: false
+
+      UIWidget
+        id: gemsIcon
+        size: 20 22
+        anchors.top: parent.top
+        anchors.left: parent.left
+        image-source: /images/game/shop/gemsIcon
+        phantom: true
+
+      Label
+        id: gemsAmount
+        size: 30 20
+        anchors.verticalCenter: parent.verticalCenter
+        anchors.left: gemsIcon.right
+        margin-left: 6
+        margin-top: 1
+        font: libel-suit-rg-11px_cp1252
+        text-auto-resize: true
+        color: #db77ff
+
+    UIButton
+      id: gemsButton
+      size: 55 20
+      anchors.top: parent.top
+      anchors.right: parent.right
+      margin-top: 1
+      margin-right: 1
+      image-source: /images/game/shop/gemsButton
+      image-clip: 0 0 55 20
+      $hover: 
+        image-clip: 0 20 55 20

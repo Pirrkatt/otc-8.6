@@ -1,3 +1,14 @@
+local categoryMap = {
+  itemCategory = 1,
+  outfitCategory = 2,
+  specialCategory = 3,
+  cosmeticsCategory = 4,
+  labelsCategory = 5,
+  aurasCategory = 6,
+  shadersCategory = 7,
+  furnitureCategory = 8,
+}
+
 -- private variables
 local SHOP_EXTENTED_OPCODE = 201
 
@@ -6,8 +17,10 @@ transferWindow = nil
 local otcv8shop = false
 local shopButton = nil
 local msgWindow = nil
+local selectedWindow = nil
 local browsingHistory = false
 local transferValue = 0
+local changeCost
 
 -- for classic store
 local storeUrl = ""
@@ -16,7 +29,6 @@ local coinsPacketSize = 0
 local CATEGORIES = {}
 local HISTORY = {}
 local STATUS = {}
-local AD = {}
 
 local selectedOffer = {}
 
@@ -53,8 +65,6 @@ function init()
   if g_game.isOnline() then
     check()
   end
-  createShop()
-  createTransferWindow()
 end
 
 function terminate()
@@ -71,18 +81,22 @@ function terminate()
   })
 
   ProtocolGame.unregisterExtendedJSONOpcode(SHOP_EXTENTED_OPCODE, onExtendedJSONOpcode)
-  
+
   if shopButton then
     shopButton:destroy()
     shopButton = nil
   end
   if shop then
-    disconnect(shop.categories, { onChildFocusChange = changeCategory })
+    disconnect(shop.categoryPanel, { onChildFocusChange = changeCategory })
     shop:destroy()
     shop = nil
   end
   if msgWindow then
     msgWindow:destroy()
+  end
+  if selectedWindow then
+    selectedWindow:destroy()
+    selectedWindow = nil
   end
 end
 
@@ -105,33 +119,10 @@ function show()
   if g_game.getFeature(GameIngameStore) then
     g_game.openStore(0)
   end
-  
+
   shop:show()
   shop:raise()
   shop:focus()
-end
-
-function softHide()
-  if not transferWindow then return end
-
-  transferWindow:hide()
-  shop:show()
-end
-
-function showTransfer()
-  if not shop or not transferWindow then return end
-
-  hide()
-  transferWindow:show()
-  transferWindow:raise()
-  transferWindow:focus()
-end
-
-function hideTransfer()
-  if not shop or not transferWindow then return end
-
-  transferWindow:hide()
-  show()
 end
 
 function toggle()
@@ -150,13 +141,7 @@ function createShop()
   shop = g_ui.displayUI('shop')
   shop:hide()
   shopButton = modules.client_topmenu.addRightGameToggleButton('shopButton', tr('Shop'), '/images/topbuttons/shop', toggle, false, 8)
-  connect(shop.categories, { onChildFocusChange = changeCategory })
-end
-
-function createTransferWindow()
-  if transferWindow then return end
-  transferWindow = g_ui.displayUI('transfer')
-  transferWindow:hide()
+  connect(shop.categoryPanel, { onChildFocusChange = changeCategory })
 end
 
 function onStoreInit(url, coins)
@@ -173,7 +158,6 @@ function onStoreInit(url, coins)
   end
   coinsPacketSize = coins
   createShop()
-  createTransferWindow()
 end
 
 function onStoreCategories(categories)
@@ -197,7 +181,7 @@ end
 function onStoreOffers(categoryName, offers)
   if not shop or otcv8shop then return end
   local updated = false
-    
+
   for i, category in ipairs(CATEGORIES) do
     if category.name == categoryName then
       if #category.offers ~= #offers then
@@ -232,8 +216,8 @@ function onStoreOffers(categoryName, offers)
   if not updated then
     return
   end
-  
-  local activeCategory = shop.categories:getFocusedChild()
+
+  local activeCategory = shop.categoryPanel:getFocusedChild()
   changeCategory(activeCategory, activeCategory)
 end
 
@@ -250,57 +234,37 @@ function onStoreTransactionHistory(currentPage, hasNextPage, offers)
       description=offer.description        
     })
   end
-  
+
   if not browsingHistory then return end  
   clearOffers()
-  shop.categories:focusChild(nil)
+  shop.categoryPanel:focusChild(nil)
   for i, transaction in ipairs(HISTORY) do
     addOffer(0, transaction)
   end
 end
 
 function onStorePurchase(message)
-  if not shop or otcv8shop then return end
-  if not transferWindow:isVisible() then
-    processMessage({title="Successful shop purchase", msg=message})
-  else
-    processMessage({title="Successfuly gifted coins", msg=message})
-    softHide()
+  if not shop or otcv8shop then
+    return
   end
+  processMessage({title="Successful shop purchase", msg=message})
 end
 
 function onStoreError(errorType, message)
-  if not shop or otcv8shop then return end
-  if not transferWindow:isVisible() then
-    processMessage({title="Shop Error", msg=message})
-  else
-    processMessage({title="Gift coins error", msg=message})
+  if not shop or otcv8shop then
+    return
   end
+  processMessage({title="Shop Error", msg=message})
 end
 
 function onCoinBalance(coins, transferableCoins)
   if not shop or otcv8shop then return end
-  shop.infoPanel.points:setText(tr("Points:") .. " " .. coins)
-  transferWindow.coinsBalance:setText(tr('Transferable Tibia Coins: ') .. coins)
-  transferWindow.coinsAmount:setMaximum(coins)
-  shop.infoPanel.buy:hide()
-  shop.infoPanel:setHeight(20)
-end
-
-function transferCoins()
-  if not transferWindow then return end
-  local amount = 0
-  amount = transferWindow.coinsAmount:getValue()
-  local recipient = transferWindow.recipient:getText()
-
-  g_game.transferCoins(recipient, amount)
-  transferWindow.recipient:setText('')
-  transferWindow.coinsAmount:setValue(0)
+  shop.gemsPanel.gemsGroup.gemsAmount:setText(coins)
 end
 
 function onExtendedJSONOpcode(protocol, code, json_data)
   createShop()
-  createTransferWindow()
+  -- createTransferWindow()
 
   local action = json_data['action']
   local data = json_data['data']
@@ -330,15 +294,6 @@ function clearOffers()
   end
 end
 
-function clearCategories()
-  CATEGORIES = {}
-  clearOffers()
-  while shop.categories:getChildCount() > 0 do
-    local child = shop.categories:getLastChild()
-    shop.categories:destroyChildren(child)
-  end
-end
-
 function clearHistory()
   HISTORY = {}
   if browsingHistory then
@@ -350,15 +305,14 @@ function processCategories(data)
   if table.equal(CATEGORIES,data) then
     return
   end
-  clearCategories()
+
   CATEGORIES = data
-  for i, category in ipairs(data) do
-    addCategory(category)
-  end
+
   if not browsingHistory then
-    local firstCategory = shop.categories:getChildByIndex(1)
+    local firstCategory = shop.categoryPanel:getChildByIndex(1)
     if firstCategory then
       firstCategory:focus()
+      changeCategory(firstCategory, firstCategory)
     end
   end
 end
@@ -397,84 +351,17 @@ function processStatus(data)
   end
   STATUS = data
 
-  if data['ad'] then 
-    processAd(data['ad'])
+  if data['nickCost'] then
+	  changeCost = tonumber(data['nickCost'])
   end
   if data['points'] then
-    shop.infoPanel.points:setText(tr("Points:") .. " " .. data['points'])
+    shop.gemsPanel.gemsGroup.gemsAmount:setText(data['points'])
   end
   if data['buyUrl'] and data['buyUrl']:sub(1, 4):lower() == "http" then
-    shop.infoPanel.buy:show()
-    shop.infoPanel.buy.onMouseRelease = function() 
+    shop.gemsPanel.gemsButton.onMouseRelease = function() 
       scheduleEvent(function() g_platform.openUrl(data['buyUrl']) end, 50)
     end
-  else
-    shop.infoPanel.buy:hide()
-    shop.infoPanel:setHeight(20)
   end
-end
-
-function processAd(data)
-  if table.equal(AD,data) then
-    return
-  end
-  AD = data
-  
-  if data['image'] and data['image']:sub(1, 4):lower() == "http" then
-    HTTP.downloadImage(data['image'], function(path, err) 
-      if err then g_logger.warning("HTTP error: " .. err .. " - " .. data['image']) return end
-      shop.adPanel:setHeight(shop.infoPanel:getHeight())
-      shop.adPanel.ad:setText("")
-      shop.adPanel.ad:setImageSource(path)
-      shop.adPanel.ad:setImageFixedRatio(true)
-      shop.adPanel.ad:setImageAutoResize(true)
-      shop.adPanel.ad:setHeight(shop.infoPanel:getHeight())
-    end)
-  elseif data['text'] and data['text']:len() > 0 then
-      shop.adPanel:setHeight(shop.infoPanel:getHeight())
-      shop.adPanel.ad:setText(data['text'])
-      shop.adPanel.ad:setHeight(shop.infoPanel:getHeight())
-  else
-      shop.adPanel:setHeight(0)
-  end
-  if data['url'] and data['url']:sub(1, 4):lower() == "http" then
-    shop.adPanel.ad.onMouseRelease = function() 
-      scheduleEvent(function() g_platform.openUrl(data['url']) end, 50)
-    end
-  else
-    shop.adPanel.ad.onMouseRelease = nil
-  end
-end
-
-function addCategory(data)
-  local category
-  if data["type"] == "item" then
-    category = g_ui.createWidget('ShopCategoryItem', shop.categories)  
-    category.item:setItemId(data["item"])
-    category.item:setItemCount(data["count"])
-    category.item:setShowCount(false)
-  elseif data["type"] == "outfit" then
-    category = g_ui.createWidget('ShopCategoryCreature', shop.categories)
-    category.creature:setOutfit(data["outfit"])
-    if data["outfit"]["rotating"] then
-      category.creature:setAutoRotating(true)
-    end
-  elseif data["type"] == "image" then
-    category = g_ui.createWidget('ShopCategoryImage', shop.categories)
-    if data["image"] and data["image"]:sub(1, 4):lower() == "http" then
-       HTTP.downloadImage(data['image'], function(path, err) 
-        if err then g_logger.warning("HTTP error: " .. err .. " - " .. data["image"]) return end
-        category.image:setImageSource(path)
-      end)
-    else
-      category.image:setImageSource(data["image"])
-    end
-  else
-    g_logger.error("Invalid shop category type: " .. tostring(data["type"]))
-    return
-  end
-  category:setId("category_" .. shop.categories:getChildCount())
-  category.name:setText(data["name"])
 end
 
 function showHistory(force)
@@ -489,7 +376,7 @@ function showHistory(force)
 
   browsingHistory = true
   clearOffers()
-  shop.categories:focusChild(nil)
+  shop.categoryPanel:focusChild(nil)
   for i, transaction in ipairs(HISTORY) do
     addOffer(0, transaction)
   end
@@ -498,7 +385,7 @@ end
 function addOffer(category, data)
   local offer
   if data["type"] == "item" then
-    offer = g_ui.createWidget('ShopOfferItem', shop.offers)  
+    offer = g_ui.createWidget('ShopOfferItem', shop.offers)
     offer.item:setItemId(data["item"])
     offer.item:setItemCount(data["count"])
     offer.item:setShowCount(false)
@@ -524,23 +411,20 @@ function addOffer(category, data)
     return
   end
   offer:setId("offer_" .. category .. "_" .. shop.offers:getChildCount())
-  offer.title:setText(data["title"] .. " (" .. data["cost"] .. " points)")
-  offer.description:setText(data["description"])  
+  offer.titlePanel.title:setText(data["title"])
+  offer.price:setText(data["cost"])
+  -- offer.description:setText(data["description"])
   offer.offerId = data["id"]
   if category ~= 0 then
-    offer.onDoubleClick = buyOffer
-    offer.buyButton.onClick = function() buyOffer(offer) end
-  else
-    offer.buyButton:hide()
+    offer.onClick = selectOffer
   end
 end
-
 
 function changeCategory(widget, newCategory)
   if not newCategory then
     return
   end
-  
+
   if g_game.getFeature(GameIngameStore) and widget ~= newCategory and not otcv8shop then
     local serviceType = 0
     if g_game.getFeature(GameTibia12Protocol) then
@@ -548,43 +432,46 @@ function changeCategory(widget, newCategory)
     end
     g_game.requestStoreOffers(newCategory.name:getText(), serviceType)
   end
-  
+
   browsingHistory = false
-  local id = tonumber(newCategory:getId():split("_")[2])
+  local id = categoryMap[newCategory:getId()]
   clearOffers()
-  for i, offer in ipairs(CATEGORIES[id]["offers"]) do
-    addOffer(id, offer)
+
+  if CATEGORIES[id] and CATEGORIES[id]["offers"] then
+    for _, offer in ipairs(CATEGORIES[id]["offers"]) do
+      addOffer(id, offer)
+    end
   end
+
+  shop.offers:focusChild(nil)
 end
 
-function buyOffer(widget)
-  if not widget then
-    return
-  end
-  local split = widget:getId():split("_")
-  if #split ~= 3 then
-    return
-  end
-  local category = tonumber(split[2])  
-  local offer = tonumber(split[3])  
-  local item = CATEGORIES[category]["offers"][offer]
-  if not item then
-    return
-  end
-  
-  selectedOffer = {category=category, offer=offer, title=item.title, cost=item.cost, id=widget.offerId}
-  
+function NicknameShopWindow()
   scheduleEvent(function()
-      if msgWindow then
-        msgWindow:destroy()
-      end
-      
-      local title = tr("Buying from shop")
-      local msg = "Do you want to buy " ..  item.title .. " for " .. item.cost .. " premium points?"
-      msgWindow = displayGeneralBox(title, msg, {
-          { text=tr('Yes'), callback=buyConfirmed },
-          { text=tr('No'), callback=buyCanceled },
-          anchor=AnchorHorizontalCenter}, buyConfirmed, buyCanceled)
+    if msgWindow then
+      msgWindow:destroy()
+    end
+	  selectedOffer = {}
+
+	  msgWindow = g_ui.createWidget('NicknameShopWindow', rootWidget)
+	  msgWindow:setText("Buying from shop")
+	  msgWindow:getChildById('countMessage'):setText("New name:")
+	  msgWindow:getChildById('countMessagePoints'):setText("Want to change nickname for "..changeCost.."?")
+	  local nicknameConfirmed = function()
+		  sendAction("changeName", {newName=msgWindow:getChildById('newName'):getText()})
+	  end
+
+	  local okButton = msgWindow:getChildById('buttonOk')
+	  local cancelButton = msgWindow:getChildById('buttonCancel')
+
+	  g_keyboard.bindKeyPress("Enter", function() nicknameConfirmed() end, spinbox)
+
+	  msgWindow.onEnter = nicknameConfirmed
+	  msgWindow.onEscape = buyCanceled
+
+	  okButton.onClick = nicknameConfirmed
+	  cancelButton.onClick = buyCanceled
+
       msgWindow:show()
       msgWindow:raise()
       msgWindow:focus()
@@ -592,27 +479,115 @@ function buyOffer(widget)
     end, 50)
 end
 
-function buyConfirmed()
-  msgWindow:destroy()
-  msgWindow = nil
-  sendAction("buy", selectedOffer)
-  if g_game.getFeature(GameIngameStore) and selectedOffer.id and not otcv8shop then
-    local offerName = selectedOffer.title:lower()
+function selectOffer(widget, focused)
+  if not widget then
+    return
+  end
+
+  if focused then
+    local split = widget:getId():split("_")
+    if #split ~= 3 then
+      return
+    end
+    local category = tonumber(split[2])
+    local offer = tonumber(split[3])
+    local item = CATEGORIES[category]["offers"][offer]
+    if not item then
+      return
+    end
+
+    selectedOffer = {category=category, buyCount=1, offer=offer, title=item.title, cost=item.cost, id=widget.offerId}
+    selectedWindow = g_ui.createWidget('SelectedOverlay', shop)
+	  selectedWindow:recursiveGetChildById('selectedTitle'):setText(selectedOffer.title)
+
+	  local itemParent = selectedWindow:recursiveGetChildById('selectedBackground')
+	  local priceText = selectedWindow:recursiveGetChildById('selectedPrice')
+    priceText:setText(selectedOffer.cost)
+
+    if item.type == 'item' then
+      if item.imageFile then
+        local imageEffect = g_ui.createWidget('ImageEffect', itemParent)
+        imageEffect:setImageSource(item.imageFile)
+      else
+        local itemOverlay = g_ui.createWidget('OverlayItem', itemParent)
+        local itemId = itemOverlay:recursiveGetChildById('item')
+        local itemCount = itemOverlay:recursiveGetChildById('itemCount')
+        itemId:setItemId(item["item"])
+        itemId:setItemCount(1)
+        itemId:setShowCount(false)
+        itemCount:setText('X1')
+        scrollbar = itemOverlay:getChildById('horizontalScroll')
+        scrollbar.onValueChange = function()
+          itemCount:setText(string.format('X%d', scrollbar:getValue()))
+          itemId:setItemCount(scrollbar:getValue())
+          priceText:setText(selectedOffer.cost * scrollbar:getValue())
+          selectedOffer.buyCount = scrollbar:getValue()
+        end
+      end
+    elseif item.type == 'outfit' then
+      local outfitOverlay = g_ui.createWidget('OverlayOutfit', itemParent)
+      outfitOverlay:setOutfit(item["outfit"])
+      if item["outfit"]["rotating"] then
+        outfitOverlay:setAutoRotating(true)
+      end
+    end
+
+	  local buyButton = selectedWindow:recursiveGetChildById('buyButton')
+
+	  buyButton.onClick = function()
+      local totalCost = math.max(selectedOffer.cost, selectedOffer.cost * selectedOffer.buyCount)
+      if totalCost > tonumber(shop.gemsPanel.gemsGroup.gemsAmount:getText()) then
+        local noPointsPanel = g_ui.createWidget('NoPointsOverlay', itemParent)
+        noPointsPanel:getChildById('okButton').onClick = buyCanceled
+        return
+      end
+
+      buyConfirmed(selectedOffer)
+    end
+    shop.onEscape = buyCanceled
+
+    selectedWindow:show()
+    selectedWindow:raise()
+    selectedWindow:focus()
+  end
+end
+
+function buyConfirmed(buyData)
+  if not selectedWindow then
+    return
+  end
+  
+  selectedWindow:destroy()
+  selectedWindow = nil
+  sendAction("buy", buyData)
+  if g_game.getFeature(GameIngameStore) and buyData.id and not otcv8shop then
+    local offerName = buyData.title:lower()
     if string.find(offerName, "name") and string.find(offerName, "change") and modules.client_textedit then
       modules.client_textedit.singlelineEditor("", function(newName)
         if newName:len() == 0 then
           return
         end
-        g_game.buyStoreOffer(selectedOffer.id, 1, newName)        
+        g_game.buyStoreOffer(buyData.id, 1, newName)        
       end)
     else
-      g_game.buyStoreOffer(selectedOffer.id, 0, "")
+      g_game.buyStoreOffer(buyData.id, 0, "")
     end
   end
+
+  shop.onEscape = function() hide() end
 end
 
 function buyCanceled()
-  msgWindow:destroy()
-  msgWindow = nil
+  if selectedWindow then
+    selectedWindow:destroy()
+    selectedWindow = nil
+  end
+
+  if msgWindow then
+    msgWindow:destroy()
+    msgWindow = nil
+  end
+
   selectedOffer = {}
+  shop.onEscape = function() hide() end
 end
