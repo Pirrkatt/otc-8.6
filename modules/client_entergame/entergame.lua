@@ -54,7 +54,7 @@ local function onCharacterList(protocol, characters, account, otui)
     loadBox:destroy()
     loadBox = nil
   end
-    
+
   CharacterList.create(characters, account, otui)
   CharacterList.show()
 
@@ -199,7 +199,7 @@ local function onTibia12HTTPResult(session, playdata)
   if not g_game.getFeature(GameExtendedOpcode) then
     g_game.setCustomOs(5) -- set os to windows if opcodes are disabled
   end
-  
+
   onCharacterList(nil, characters, account, nil)  
 end
 
@@ -289,7 +289,7 @@ local function onHTTPResult(data, err)
       end
     end
   end
-  
+
   onCharacterList(nil, characters, account, nil)  
 end
 

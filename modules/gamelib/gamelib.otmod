@@ -9,6 +9,7 @@ Module
     dofile 'util'
     dofile 'protocol'
     dofile 'protocollogin'
+    dofile 'protocolstatus'
     dofile 'protocolgame'
     dofile 'position'
     dofile 'game'

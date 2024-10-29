@@ -91,10 +91,12 @@ typedef std::unordered_map<Position, SpawnPtr, PositionHasher> SpawnMap;
 
 // net
 class ProtocolLogin;
+class ProtocolStatus;
 class ProtocolGame;
 
 typedef stdext::shared_object_ptr<ProtocolGame> ProtocolGamePtr;
 typedef stdext::shared_object_ptr<ProtocolLogin> ProtocolLoginPtr;
+typedef stdext::shared_object_ptr<ProtocolStatus> ProtocolStatusPtr;
 
 // ui
 class UIItem;

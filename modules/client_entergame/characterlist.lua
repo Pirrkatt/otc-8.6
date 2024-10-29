@@ -264,10 +264,10 @@ function CharacterList.create(characters, account, otui)
           subWidget:setOutfit(value)
         else
           local text = value
-          if subWidget.baseText and subWidget.baseTranslate then
-            text = tr(subWidget.baseText, text)
-          elseif subWidget.baseText then
-            text = string.format(subWidget.baseText, text)
+            if subWidget.baseText and subWidget.baseTranslate then
+              text = tr(subWidget.baseText, text)
+            elseif subWidget.baseText then
+              text = string.format(subWidget.baseText, text)
           end
           subWidget:setText(text)
         end
@@ -320,7 +320,7 @@ function CharacterList.create(characters, account, otui)
   else
     accountStatusLabel:setOn(false)
   end
-  
+
   autoReconnectButton.onClick = function(widget)
     local autoReconnect = not g_settings.getBoolean('autoReconnect', true)
     autoReconnectButton:setOn(autoReconnect)
@@ -343,7 +343,7 @@ function CharacterList.show()
   charactersWindow:show()
   charactersWindow:raise()
   charactersWindow:focus()
-  
+
   local autoReconnect = g_settings.getBoolean('autoReconnect', true)
   autoReconnectButton:setOn(autoReconnect)
 end
