@@ -1,0 +1,10 @@
+Module
+  name: game_kiblast
+  description: Customized Spell
+  author: Pirrkatt
+  website: 
+  sandboxed: true
+  autoload: true
+  scripts: [ kiblast ]
+  @onLoad: init()
+  @onUnload: terminate()

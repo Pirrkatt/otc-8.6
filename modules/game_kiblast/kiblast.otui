@@ -1,0 +1,45 @@
+UIWidget
+  id: kiblastWidget
+  image-source: /images/game/kiblast/kiblast
+  anchors.top: parent.top
+  anchors.horizontalCenter: parent.horizontalCenter
+  margin-right: 120
+  margin-top: 50
+  phantom: true
+  focusable: false
+
+  UIWidget
+    id: icon_1
+    image-source: /images/game/kiblast/top-left
+    anchors.horizontalCenter: parent.horizontalCenter
+    anchors.verticalCenter: parent.verticalCenter
+    margin-right: 14
+    margin-bottom: 13
+    visible: true
+
+  UIWidget
+    id: icon_2
+    image-source: /images/game/kiblast/top-right
+    anchors.horizontalCenter: parent.horizontalCenter
+    anchors.verticalCenter: parent.verticalCenter
+    margin-left: 15
+    margin-bottom: 13
+    visible: true
+
+  UIWidget
+    id: icon_3
+    image-source: /images/game/kiblast/bottom-right
+    anchors.horizontalCenter: parent.horizontalCenter
+    anchors.verticalCenter: parent.verticalCenter
+    margin-left: 14
+    margin-top: 15
+    visible: true
+
+  UIWidget
+    id: icon_4
+    image-source: /images/game/kiblast/bottom-left
+    anchors.horizontalCenter: parent.horizontalCenter
+    anchors.verticalCenter: parent.verticalCenter
+    margin-right: 14
+    margin-top: 14
+    visible: true
