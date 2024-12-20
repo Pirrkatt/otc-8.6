@@ -1,0 +1,17 @@
+StopWatchWidget < TileWidget
+  id: stopwatchWidget
+  anchors.top: parent.top
+  anchors.horizontalCenter: parent.horizontalCenter
+  margin-top: -100
+  image-source: /images/game/stopwatch/stopwatch_bar_empty
+  phantom: true
+  focusable: false
+
+  UIWidget
+    id: stopwatchFilled
+    anchors.fill: parent
+    image-source: /images/game/stopwatch/stopwatch_bar_filled
+    image-clip: 0 0 1 21
+    image-rect: 0 0 1 21
+    phantom: true
+    focusable: false

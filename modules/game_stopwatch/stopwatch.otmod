@@ -1,0 +1,10 @@
+Module
+  name: game_stopwatch
+  description: Stopwatch Module
+  author: Pirrkatt
+  website: 
+  sandboxed: true
+  autoload: true
+  scripts: [ stopwatch ]
+  @onLoad: init()
+  @onUnload: terminate()
