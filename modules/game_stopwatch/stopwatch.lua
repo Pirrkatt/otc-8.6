@@ -25,17 +25,26 @@ function Stopwatch.create(_, _, posString)
   data.pos = {x = pos[1], y = pos[2], z = pos[3]}
 
   local tile = g_map.getTile(data.pos)
-if tile and not tile:getWidget() then
+	if tile and not tile:getWidget() then
+    local creature = tile:getCreatures()[1]
+    if not creature then
+      return
+    end
+
     local start_time = g_clock.millis()
-local widget = g_ui.createWidget("StopWatchWidget", rootWidget)
+		local widget = g_ui.createWidget("StopWatchWidget", rootWidget)
+    local offset = creature:getInformationOffset()
+
+    widget:setMarginTop(widget:getMarginTop() + offset.y)
+    widget:setMarginLeft(widget:getMarginLeft() + offset.x)
 
     data.start_time = start_time
     data.widget = widget
     data.squaresAdded = 0
 
-tile:setWidget(widget)
+		tile:setWidget(widget)
     Stopwatch.updateBar(data)
-end
+	end
 end
 
 function Stopwatch.updateBar(data)
