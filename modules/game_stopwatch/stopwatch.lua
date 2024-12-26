@@ -15,7 +15,6 @@ end
 
 function terminate()
   ProtocolGame.unregisterExtendedOpcode(config.opCode)
-  Stopwatch.destroy()
 end
 
 function Stopwatch.create(_, _, posString)
