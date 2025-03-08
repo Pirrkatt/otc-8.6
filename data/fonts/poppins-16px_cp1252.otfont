@@ -1,0 +1,6 @@
+Font
+  name: poppins-16px_cp1252
+  texture: poppins-16px_cp1252
+  height: 25
+  glyph-size: 16 25
+  space-width: 3

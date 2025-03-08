@@ -1,0 +1,6 @@
+Font
+  name: libel_font-11px_cp1252
+  texture: libel_font-11px_cp1252
+  height: 13
+  glyph-size: 16 16
+  space-width: 3

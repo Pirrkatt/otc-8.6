@@ -1,100 +1,109 @@
+CraftingScrollBar < UIScrollBar
+  orientation: vertical
+  image-source: /images/game/crafting/scroll_empty
+  pixels-scroll: true
+
+  UIButton
+    id: decrementButton
+
+  UIButton
+    id: incrementButton
+
+  UIButton
+    id: sliderButton
+    anchors.centerIn: parent
+    width: 3
+    image-source: /images/game/crafting/scroll_handler
+    opacity: 1
+    visible: true
+    $disabled:
+      visible: false
+
 CategoryButton < UIButton
-  font: verdana-11px-antialised
-  color: #dfdfdfff
-  size: 106 23
-  image-source: /images/ui/button
-  image-color: #ababab
-  image-clip: 0 0 22 23
-  image-border: 3
-  opacity: 1.0
-  padding-left: 0
-
-  $hover !disabled:
-    image-color: #dfdfdf
-
-  $pressed:
-    image-clip: 0 46 22 23
-    padding-left: 1
+  font: poppins-16px_cp1252
+  height: 23
+  color: #d7cbfa
+  text-align: center
+  $hover:
+    color: #ffe399
 
   $on:
-    image-color: #ffffff
-
-  $disabled:
-    color: #dfdfdf88
-    opacity: 0.8
-
-CategoryItem < UIItem
-  anchors.top: parent.top
-  anchors.left: parent.left
-  size: 34 34
-  padding: 1
-  virtual: true
-  phantom: true
-
-CategoryLabel < Label
-  anchors.top: parent.top
-  anchors.left: prev.right
-  anchors.right: parent.right
-  anchors.bottom: parent.bottom
-  text-align: left
+    color: #ffc52c
 
 ItemListItem < Panel
   phantom: false
   height: 36
-  image-source: /images/ui/button
-  image-color: #ababab
-  image-clip: 0 0 22 23
-  image-border: 3
-  padding-left: 3
+  background-color: alpha
+  &updateOnStates: |
+    function(self)
+      local children = self:getChildren()
+      for i=1,#children do
+        children[i]:setOn(self:isFocused())
+      end
+    end
+  @onFocusChange: self:updateOnStates()
   @onClick: modules.game_crafting.selectItem(self:getId())
 
   $hover !disabled:
-    image-color: #dfdfdf
+    background-color: green
 
   $focus:
-    image-color: #ffffff
+    background-color: #0e0c12
 
-  UIItem
-    id: item
+  $hover:
+    background-color: #201c26
+
+  UIWidget
+    id: itemBackground
+    size: 34 34
     anchors.verticalCenter: parent.verticalCenter
     anchors.left: parent.left
-    size: 34 34
-    padding: 1
-    virtual: true
-  
+    margin-left: 2
+    image-source: /images/game/crafting/itemBox
+
+    $on:
+      image-source: /images/game/crafting/itemBox_focus
+
+    UIItem
+      id: item
+      anchors.horizontalCenter: parent.horizontalCenter
+      anchors.verticalCenter: parent.verticalCenter
+      size: 28 28
+      virtual: true
+
   Label
     id: name
-    anchors.top: item.top
-    anchors.left: item.right
+    anchors.verticalCenter: parent.verticalCenter
+    anchors.left: itemBackground.right
     anchors.right: parent.right
-    margin-top: 3
-    margin-left: 5
+    margin-left: 7
     text-align: left
-  
-  Label
-    id: level
-    anchors.left: item.right
-    anchors.right: parent.right
-    anchors.bottom: item.bottom
-    margin-bottom: 3
-    margin-left: 5
-    text-align: left
-    color: #afafaf
+    font: poppins-light-11px_cp1252
+
+    $on:
+      color: #e5b344
 
 CraftItem < UIItem
-  size: 34 34
+  anchors.centerIn: parent
+  size: 64 64
   padding: 1
-  image-source: /images/ui/item
   font: verdana-11px-rounded
   color: white
   virtual: true
 
+MaterialItem < UIWidget
+  size: 128 127
+  image-source: /images/game/crafting/itemBoxBig
+  margin-top: -8
+
 CountLabel < Label
-  anchors.top: prev.top
-  anchors.bottom: prev.bottom
-  font: verdana-11px-rounded
+  height: 20
+  anchors.horizontalCenter: parent.horizontalCenter
+  anchors.bottom: parent.bottom
+  margin-bottom: 15
+  font: poppins-12px_cp1252
   text-auto-resize: true
-  margin-top: 5
+  text-align: center
 
 MiniPanel < Panel
   text-offset: 0 2
@@ -108,377 +117,350 @@ MiniPanel < Panel
   padding-top: 18
   padding-right: 2
 
-MainWindow
-  text: Crafting System
-  size: 600 450
+UIWindow
+  size: 665 441
+  image-source: /images/game/crafting/background
+  anchors.centerIn: parent
+  @onEscape: modules.game_crafting.hide()
 
   Panel
     id: categories
     anchors.top: parent.top
     anchors.left: parent.left
-    width: 510
-    height: 34
+    width: 480
+    height: 40
+    margin-left: 8
+    margin-top: 6
     layout: horizontalBox
 
     CategoryButton
-      id: weaponsCat
-      width: 95
-      @onClick: modules.game_crafting.selectCategory("weapons")
-
-      CategoryItem
-        item-id: 14903
-      
-      CategoryLabel
-        text: Weapons
-
-    CategoryButton
-      id: equipmentCat
-      width: 95
-      @onClick: modules.game_crafting.selectCategory("equipment")
-
-      CategoryItem
-        item-id: 14904
-      
-      CategoryLabel
-        text: Headers
+      id: legsCat
+      width: 78
+      text: LEGS
+      @onClick: modules.game_crafting.selectCategory("legs")
 
     CategoryButton
       id: potionsCat
-      width: 95
+      width: 55
+      text: BODIES
       @onClick: modules.game_crafting.selectCategory("potions")
-
-      CategoryItem
-        item-id: 13458
-      
-      CategoryLabel
-        text: Bodies 
-
-    CategoryButton
-      id: legsCat
-      width: 95
-      @onClick: modules.game_crafting.selectCategory("legs")
-
-      CategoryItem
-        item-id: 13476
-      
-      CategoryLabel
-        text: Legs 
 
     CategoryButton
       id: upgradeablesCat
-      width: 95
+      text: BOOTS
+      width: 90
       @onClick: modules.game_crafting.selectCategory("upgradeables")
 
-      CategoryItem
-        item-id: 13495
-      
-      CategoryLabel
-        text: Boots
+    CategoryButton
+      id: equipmentCat
+      text: HELMETS
+      width: 80
+      @onClick: modules.game_crafting.selectCategory("equipment")
+
+    CategoryButton
+      id: weaponsCat
+      text: WEAPONS
+      width: 100
+      @onClick: modules.game_crafting.selectCategory("weapons")
 
     CategoryButton
       id: othersCat
-      width: 95
+      text: OTHERS
+      width: 75
       @onClick: modules.game_crafting.selectCategory("others")
 
-      CategoryItem
-        item-id: 14815
-      
-      CategoryLabel
-        text: Others
-  
-  HorizontalSeparator
+  Panel
+    id: searchPanel
+    size: 157 33
     anchors.top: prev.bottom
     anchors.left: parent.left
-    anchors.right: parent.right
-    margin-top: 10
-
-  Panel
-    anchors.top: prev.top
-    anchors.left: parent.left
-    anchors.right: parent.right
-    margin-top: 10
-    height: 23
+    image-source: /images/game/crafting/searchBox
+    margin-top: 20
+    margin-left: 27
 
     Label
       anchors.verticalCenter: parent.verticalCenter
       anchors.left: parent.left
-      text: Search
+      margin-left: 12
+      text: SEARCH:
+      font: poppins-light-11px_cp1252
 
     TextEdit
       id: searchInput
       anchors.verticalCenter: parent.verticalCenter
       anchors.left: prev.right
-      margin-left: 5
-      width: 130
+      anchors.right: parent.right
+      margin-left: -7
+      margin-right: 5
+      width: 20
+      image-source: 
+      cursor: text
+      color: #e5b344
+      font: poppins-light-11px_cp1252
       @onKeyPress: modules.game_crafting.onSearch()
 
-    Label
-      anchors.verticalCenter: parent.verticalCenter
-      anchors.left: prev.right
-      text: Vocation
-      margin-left: 25
-
-    ComboBox
-      id: vocations
-      anchors.verticalCenter: parent.verticalCenter
-      anchors.left: prev.right
-      width: 100
-      margin-left: 5
-      text: Sorcerer
-  
-  HorizontalSeparator
-    anchors.top: prev.bottom
-    anchors.left: parent.left
-    anchors.right: parent.right
-    margin-top: 10
+  Label
+    anchors.bottom: itemsList.top
+    anchors.left: itemsList.left
+    margin-bottom: 5
+    margin-left: 2
+    font: poppins-12px_cp1252
+    text: CRAFTABLE ITEMS
 
   ScrollablePanel
     id: itemsList
-    anchors.top: prev.bottom
-    anchors.left: parent.left
-    anchors.bottom: separator.top
-    margin-top: 10
-    margin-bottom: 10
-    width: 210
-    text-offset: 0 4
-    text-align: top
-    image-source: /images/ui/miniwindow
-    image-border: 4
-    image-border-top: 25
-    image-border-bottom: 4
-    image-border-left: 27
+    size: 159 271
+    anchors.top: searchPanel.bottom
+    anchors.left: searchPanel.left
+    margin-top: 39
+    image-source: /images/game/crafting/craftBox
     padding-bottom: 3
-    padding-top: 21
-    padding-right: 16
-    padding-left: 3
-    text: Craftable Items
+    padding-top: 5
+    padding-right: 10
+    padding-left: 5
     vertical-scrollbar: itemsListScrollbar
     layout: verticalBox
     auto-focus: none
 
-  VerticalScrollBar
+  CraftingScrollBar
     id: itemsListScrollbar
     anchors.top: itemsList.top
     anchors.bottom: itemsList.bottom
     anchors.right: itemsList.right
-    margin-top: 18
-    margin-bottom: 4
-    margin-right: 3
+    margin-top: 3
+    margin-bottom: 3
+    margin-right: 5
     step: 24
-    pixels-scroll: true
-
-  VerticalSeparator
-    anchors.top: itemsList.top
-    anchors.bottom: itemsList.bottom
-    anchors.left: itemsList.right
-    margin-left: 10
   
-  MiniPanel
+  UIWidget
     id: craftPanel
-    anchors.top: prev.top
-    anchors.bottom: prev.bottom
-    anchors.left: prev.right
+    anchors.top: searchPanel.top
+    anchors.bottom: parent.bottom
     anchors.right: parent.right
-    margin-left: 10
-    text: Crafting Process
+    anchors.left: itemsList.right
+    margin-left: 22
+    margin-top: -14
+    margin-right: 6
+    margin-bottom: 6
+    phantom: true
 
     Label
-      id: description
-      anchors.top: parent.top
-      anchors.left: parent.left
-      anchors.right: parent.right
-      height: 28
-      text-align: center
-
-    CraftItem
-      id: craftOutcome
-      anchors.centerIn: parent
-      margin-bottom: 10
-
-    Panel
-      id: craftLine1
-      anchors.top: craftOutcome.top
-      anchors.right: craftOutcome.left
-      margin-top: -31
-      margin-right: 5
-      image-source: /images/crafting/craft_line1
-
-    CraftItem
-      id: material1
-      anchors.bottom: prev.bottom
-      anchors.left: parent.left
-      margin-left: 5
-      margin-bottom: 16
-
-    CountLabel
-      id: count1
-      anchors.left: prev.right
-      text-align: left
-      margin-left: 5
-
-    Panel
-      id: craftLine2
-      anchors.top: craftOutcome.top
-      anchors.right: craftOutcome.left
-      margin-top: 16
-      margin-right: 5
-      image-source: /images/crafting/craft_line5
-
-    CraftItem
-      id: material2
-      anchors.bottom: prev.bottom
-      anchors.left: parent.left
-      margin-left: 5
-      margin-bottom: -15
-
-    CountLabel
-      id: count2
-      anchors.left: prev.right
-      text-align: left
-      margin-left: 5
-
-    Panel
-      id: craftLine3
-      anchors.top: craftOutcome.top
-      anchors.right: craftOutcome.left
-      margin-top: 32
-      margin-right: 5
-      image-source: /images/crafting/craft_line3
-
-    CraftItem
-      id: material3
-      anchors.bottom: prev.bottom
-      anchors.left: parent.left
-      margin-left: 5
-      margin-bottom: -15
-
-    CountLabel
-      id: count3
-      anchors.left: prev.right
-      text-align: left
-      margin-left: 5
-
-    Panel
-      id: craftLine4
-      anchors.top: craftOutcome.top
-      anchors.left: craftOutcome.right
-      margin-top: -31
-      margin-left: 5
-      image-source: /images/crafting/craft_line4
-
-    CraftItem
-      id: material4
-      anchors.bottom: prev.bottom
-      anchors.right: parent.right
-      margin-right: 5
-      margin-bottom: 16
-
-    CountLabel
-      id: count4
-      anchors.right: prev.left
-      text-align: right
-      margin-right: 5
-    
-    Panel
-      id: craftLine5
-      anchors.top: craftOutcome.top
-      anchors.left: craftOutcome.right
-      margin-top: 16
-      margin-left: 5
-      image-source: /images/crafting/craft_line5
-
-    CraftItem
-      id: material5
-      anchors.bottom: prev.bottom
-      anchors.right: parent.right
-      margin-right: 5
-      margin-bottom: -15
-
-    CountLabel
-      id: count5
-      anchors.right: prev.left
-      text-align: right
-      margin-right: 5
-
-    Panel
-      id: craftLine6
-      anchors.top: craftOutcome.top
-      anchors.left: craftOutcome.right
-      margin-top: 32
-      margin-left: 5
-      image-source: /images/crafting/craft_line6
-
-    CraftItem
-      id: material6
-      anchors.bottom: prev.bottom
-      anchors.right: parent.right
-      margin-right: 5
-      margin-bottom: -15
-
-    CountLabel
-      id: count6
-      anchors.right: prev.left
-      text-align: right
-      margin-right: 5
-
-    Label
-      anchors.bottom: parent.bottom
-      anchors.right: parent.right
-      margin-right: 5
-      margin-bottom: 19
-      text: Total Cost In Zeni
-      text-align: right
-      color: #afafaf
-
-    FlatPanel
-      anchors.bottom: parent.bottom
-      anchors.right: parent.right
-      margin-right: 5
+      id: craftOutcomeLabel
+      text: CRAFTABLE ITEM
+      anchors.bottom: next.top
+      anchors.horizontalCenter: next.horizontalCenter
       margin-bottom: 5
-      size: 90 14
+      text-align: center
+      font: poppins-12px_cp1252
 
-      UIItem
-        anchors.top: parent.top
-        anchors.left: parent.left
-        margin-top: -10
-        margin-left: -10
-        size: 34 34
-        padding: 1
-        item-id: 3031
-        virtual: true
+    UIWidget
+      id: craftOutcomeBox
+      image-source: /images/game/crafting/craftOutcomeBox
+      anchors.centerIn: parent
+      margin-bottom: 12
+      size: 128 94
+
+      CraftItem
+        id: craftOutcome
+
+    MaterialItem
+      anchors.top: parent.top
+      anchors.right: craftOutcomeBox.left
+      margin-right: 17
+      margin-top: 4
+
+      CraftItem
+        id: material1
+      
+      CountLabel
+        id: count1
+
+      UIWidget
+        id: disabled1
+        image-source: /images/game/crafting/itemDisabled
+        anchors.centerIn: parent
+        visible: false
+
+        $on:
+          visible: true
+
+    MaterialItem
+      anchors.top: prev.bottom
+      anchors.left: prev.left
+
+      CraftItem
+        id: material2
+
+      CountLabel
+        id: count2
+
+      UIWidget
+        id: disabled2
+        image-source: /images/game/crafting/itemDisabled
+        anchors.centerIn: parent
+        visible: false
+
+        $on:
+          visible: true
+
+    MaterialItem
+      anchors.top: prev.bottom
+      anchors.left: prev.left
+
+      CraftItem
+        id: material3
+
+      CountLabel
+        id: count3
+
+      UIWidget
+        id: disabled3
+        image-source: /images/game/crafting/itemDisabled
+        anchors.centerIn: parent
+        visible: false
+
+        $on:
+          visible: true
+
+    MaterialItem
+      anchors.top: parent.top
+      anchors.left: craftOutcomeBox.right
+      margin-left: 17
+      margin-top: 4
+
+      CraftItem
+        id: material4
+
+      CountLabel
+        id: count4
+
+      UIWidget
+        id: disabled4
+        image-source: /images/game/crafting/itemDisabled
+        anchors.centerIn: parent
+        visible: false
+
+        $on:
+          visible: true
+
+    MaterialItem
+      anchors.top: prev.bottom
+      anchors.right: prev.right
+
+      CraftItem
+        id: material5
+
+      CountLabel
+        id: count5
+
+      UIWidget
+        id: disabled5
+        image-source: /images/game/crafting/itemDisabled
+        anchors.centerIn: parent
+        visible: false
+
+        $on:
+          visible: true
+
+    MaterialItem
+      anchors.top: prev.bottom
+      anchors.right: prev.right
+
+      CraftItem
+        id: material6
+
+      CountLabel
+        id: count6
+
+      UIWidget
+        id: disabled6
+        image-source: /images/game/crafting/itemDisabled
+        anchors.centerIn: parent
+        visible: false
+
+        $on:
+          visible: true
+
+    Label
+      anchors.horizontalCenter: next.horizontalCenter
+      anchors.bottom: next.top
+      margin-bottom: 5
+      text: COST
+      text-align: center
+      font: poppins-12px_cp1252
+      text-auto-resize: true
+
+    UIWidget
+      size: 96 45
+      anchors.bottom: craftOutcomeLabel.top
+      anchors.horizontalCenter: parent.horizontalCenter
+      margin-bottom: 20
+      image-source: /images/game/crafting/costBackground
       
       Label
         id: totalCost
-        anchors.top: parent.top
-        anchors.left: parent.left
-        anchors.right: parent.right
-        margin-right: 4
-        text-align: right
+        anchors.verticalCenter: parent.verticalCenter
+        anchors.horizontalCenter: parent.horizontalCenter
+        margin-right: 5
+        margin-top: 1
+        text-align: center
+        text-auto-resize: true
+        font: poppins-12px_cp1252
 
-    CategoryButton
+      UIWidget
+        image-source: /images/game/crafting/coin
+        size: 11 11
+        anchors.left: totalCost.right
+        anchors.verticalCenter: parent.verticalCenter
+        margin-left: 4
+
+    UIButton
       id: craftButton
-      anchors.bottom: parent.bottom
+      size: 148 47
+      anchors.top: craftOutcomeBox.bottom
       anchors.horizontalCenter: parent.horizontalCenter
-      size: 80 34
-      margin-bottom: 5
+      margin-top: 24
+      image-source: /images/game/crafting/craftButton
+      image-clip: 0 0 148 47
       @onClick: modules.game_crafting.craftItem()
 
-      CategoryItem
-        item-id: 13593
-      
-      CategoryLabel
-        text: Craft
+      $hover:
+        image-clip: 0 94 148 47
 
-  HorizontalSeparator
-    id: separator
-    anchors.bottom: parent.bottom
-    anchors.left: parent.left
-    anchors.right: parent.right
-    margin-bottom: 30
+      $pressed:
+        image-clip: 0 47 148 47
 
-  Button
-    anchors.bottom: parent.bottom
+  UIWidget
+    id: currencyPanel
+    image-source: /images/game/crafting/currencyBg
+    size: 114 22
+    anchors.top: closeButton.top
+    anchors.right: closeButton.left
+    margin-top: 2
+    margin-right: 12
+
+    Label
+      id: currencyAmount
+      anchors.right: parent.right
+      anchors.left: parent.left
+      anchors.verticalCenter: parent.verticalCenter
+      margin-right: 28
+      margin-left: 5
+      margin-top: 1
+      text-align: right
+      font: poppins-light-11px_cp1252
+
+  UIButton
+    id: closeButton
+    size: 25 25
+    image-source: /images/game/crafting/closeButton
+    image-clip: 0 0 25 25
+    anchors.top: parent.top
     anchors.right: parent.right
-    text: Close
-    width: 60
+    margin-top: 15
+    margin-right: 14
     @onClick: modules.game_crafting.hide()
+    $hover:
+      image-clip: 0 25 25 25
+    $pressed:
+      image-clip: 0 50 25 25

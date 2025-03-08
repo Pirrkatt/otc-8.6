@@ -1,0 +1,6 @@
+Font
+  name: candide-12px
+  texture: candide-12px_cp1252
+  height: 15
+  glyph-size: 17 17
+  space-width: 3

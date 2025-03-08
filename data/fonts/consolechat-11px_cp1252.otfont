@@ -1,0 +1,6 @@
+Font
+  name: consolechat-11px_cp1252
+  texture: consolechat-11px_cp1252
+  height: 16
+  glyph-size: 16 16
+  space-width: 5
