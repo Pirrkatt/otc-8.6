@@ -1,0 +1,10 @@
+Module
+  name: game_npcdialogue
+  description: Interactive text dialogue popups for NPCs
+  author: Pirrkatt
+  website: Discord@pirrkatt
+  sandboxed: true
+  autoload: true
+  scripts: [ npcdialogue ]
+  @onLoad: init()
+  @onUnload: terminate()

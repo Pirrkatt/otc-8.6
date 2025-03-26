@@ -1099,7 +1099,10 @@ function onTalk(name, level, mode, message, channelId, creaturePos)
     else
       staticText:addMessage(name, mode, staticMessage)
     end
-    g_map.addThing(staticText, creaturePos, -1)
+
+    if not isNpcMode or not modules.game_npcdialogue.config.hideNpcPopupText then
+      g_map.addThing(staticText, creaturePos, -1)
+    end
   end
 
   local defaultMessage = mode <= 3 and true or false
@@ -1116,7 +1119,9 @@ function onTalk(name, level, mode, message, channelId, creaturePos)
   elseif mode == MessageModes.RVRContinue then
     addText(composedMessage, speaktype, name .. '\'...', name)
   elseif speaktype.private then
-    addPrivateText(composedMessage, speaktype, name, false, name)
+    if speaktype ~= SpeakTypesSettings.privateNpcToPlayer or not modules.game_npcdialogue.config.hideNpcTabText then
+      addPrivateText(composedMessage, speaktype, name, false, name)
+    end
     if modules.client_options.getOption('showPrivateMessagesOnScreen') and speaktype ~= SpeakTypesSettings.privateNpcToPlayer then
       modules.game_textmessage.displayPrivateMessage(name .. ':\n' .. message)
     end

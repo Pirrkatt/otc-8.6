@@ -1,0 +1,89 @@
+UIWindow
+  id: npcDialogueWidget
+  size: 444 80
+  image-border: 50
+  anchors.horizontalCenter: parent.horizontalCenter
+  margin-bottom: 50
+  margin-right: 80
+  draggable: false
+  focusable: false
+
+  UIWidget
+    id: mainPanel
+    size: 444 80
+    phantom: true
+    image-source: /images/game/npcdialogue/background
+    image-border: 30
+    anchors.top: parent.top
+    anchors.horizontalCenter: parent.horizontalCenter
+    margin-top: 25
+
+  UIWidget
+    id: baseOut
+    size: 300 52
+    phantom: true
+    image-source: /images/game/npcdialogue/base_out
+    image-border: 50
+    anchors.top: parent.top
+    anchors.left: parent.left
+    margin-top: -5
+    margin-left: 27
+
+  UIWidget
+    id: outfitBox
+    size: 57 51
+    phantom: true
+    anchors.top: parent.top
+    anchors.left: parent.left
+    margin-left: 27
+    margin-top: -5
+
+    UICreature
+      id: npcOutfit
+      size: 36 36
+      anchors.centerIn: parent
+      phantom: true
+      old-scaling: true
+      visible: false
+
+    UIItem
+      id: npcOutfitItem
+      size: 36 36
+      anchors.centerIn: parent
+      phantom: true
+      visible: false
+
+  UIWidget
+    id: npcName
+    phantom: true
+    font: sono_bold_16
+    text-align: left
+    text-auto-resize: true
+    anchors.bottom: mainPanel.top
+    anchors.left: outfitBox.right
+    margin-left: 10
+    margin-bottom: -2
+
+  UIScrollArea
+    id: textPanel
+    phantom: true
+    anchors.top: outfitBox.bottom
+    anchors.left: outfitBox.left
+    anchors.right: mainPanel.right
+    anchors.bottom: mainPanel.bottom
+    margin-top: 15
+    margin-left: -5
+    margin-right: 20
+
+    UIWidget
+      id: npcText
+      font: sono_medium_12
+      color: white
+      text-wrap: true
+      text-align: topLeft
+      phantom: false
+      text-style: underline
+      anchors.top: parent.top
+      anchors.bottom: parent.bottom
+      anchors.left: parent.left
+      anchors.right: parent.right
