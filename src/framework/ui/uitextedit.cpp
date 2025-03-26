@@ -94,7 +94,7 @@ void UITextEdit::drawSelf(Fw::DrawPane drawPane)
         if(glyphsMustRecache) {
             m_glyphsTextCoordsBuffer.clear();
             for (int i = 0; i < textLength; ++i) {
-                if(m_glyphsCoords[i].isValid())
+                if (m_glyphsCoords[i].isValid())
                     m_glyphsTextCoordsBuffer.addRect(m_glyphsCoords[i], m_glyphsTexCoords[i]);
             }
         }
@@ -107,6 +107,9 @@ void UITextEdit::drawSelf(Fw::DrawPane drawPane)
                 g_drawQueue->addColoredTextureCoords(m_glyphsTextCoordsBuffer, texture, m_drawTextColors);
             }
         }
+
+        if (m_textUnderline.getVertexCount() > 0)
+            g_drawQueue->addFillCoords(m_textUnderline, m_color);
     }
 
     if(hasSelection()) {
@@ -347,6 +350,9 @@ void UITextEdit::update(bool focusCursor)
         m_glyphsCoords[i] = glyphScreenCoords;
         m_glyphsTexCoords[i] = glyphTextureCoords;
     }
+
+    if (hasEventListener(EVENT_TEXT_CLICK) || hasEventListener(EVENT_TEXT_HOVER))
+        updateRectToWord(m_glyphsCoords);
 
     if(fireAreaUpdate)
         onTextAreaUpdate(m_textVirtualOffset, m_textVirtualSize, m_textTotalSize);
@@ -630,6 +636,9 @@ int UITextEdit::getTextPos(Point pos)
 
 std::string UITextEdit::getDisplayedText()
 {
+    if ((hasEventListener(EVENT_TEXT_CLICK) || hasEventListener(EVENT_TEXT_HOVER)) && m_textEvents.empty())
+        processCodeTags();
+
     std::string text;
     if(m_textHidden)
         text = std::string(m_text.length(), '*');

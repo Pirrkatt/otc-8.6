@@ -25,6 +25,7 @@
 #include <framework/graphics/fontmanager.h>
 #include <framework/graphics/painter.h>
 #include <framework/core/application.h>
+#include <regex>
 
 void UIWidget::initText()
 {
@@ -34,6 +35,9 @@ void UIWidget::initText()
 
 void UIWidget::updateText()
 {
+    if ((hasEventListener(EVENT_TEXT_CLICK) || hasEventListener(EVENT_TEXT_HOVER)) && m_textEvents.empty())
+        processCodeTags();
+
     if (m_textWrap && m_rect.isValid()) {
         m_drawTextColors = m_textColors;
         m_drawText = m_font->wrapText(m_text, getWidth() - m_textOffset.x, &m_drawTextColors);
@@ -92,6 +96,9 @@ void UIWidget::drawText(const Rect& screenCoords)
         Rect coords = Rect(screenCoords.topLeft() + m_textOffset, screenCoords.bottomRight());
         m_textMustRecache = false;
         m_textCachedScreenCoords = coords;
+
+        if (hasEventListener(EVENT_TEXT_CLICK) || hasEventListener(EVENT_TEXT_HOVER))
+        cacheRectToWord();
     }
 
     if (!m_drawTextColors.empty()) {
@@ -99,6 +106,9 @@ void UIWidget::drawText(const Rect& screenCoords)
     } else {
         m_font->drawText(m_drawText, m_textCachedScreenCoords, m_textAlign, m_color, m_shadow);
     }
+
+    if (m_textUnderline.getVertexCount() > 0)
+        g_drawQueue->addFillCoords(m_textUnderline, m_color);
 }
 
 void UIWidget::onTextChange(const std::string& text, const std::string& oldText)
@@ -118,6 +128,7 @@ void UIWidget::setText(std::string text, bool dontFireLuaCall)
 
     m_textColors.clear();
     m_drawTextColors.clear();
+    m_textEvents.clear();
 
     if(m_text == text)
         return;
@@ -135,15 +146,24 @@ void UIWidget::setColoredText(const std::vector<std::string>& texts, bool dontFi
 {
     m_textColors.clear();
     m_drawTextColors.clear();
+    m_textEvents.clear();
 
     std::string text = "";
     for(size_t i = 0, p = 0; i < texts.size() - 1; i += 2) {
         Color c(Color::white);
         stdext::cast<Color>(texts[i + 1], c);
         text += texts[i];
-        for (auto& c : texts[i]) {
-            if ((uint8)c >= 32)
+
+        std::regex regex(R"(\[text-event\](.*?)\[/text-event\])");
+        std::smatch match;
+        std::regex_search(texts[i], match, regex);
+
+        for (size_t j = 0; j < texts[i].size(); ++j) {
+            if ((uint8)texts[i][j] >= 32)
                 p += 1;
+        }
+        if (match.size() > 0) {
+            p -= 25;
         }
         m_textColors.push_back(std::make_pair(p, c));
     }
@@ -165,4 +185,71 @@ void UIWidget::setFont(const std::string& fontName)
     m_font = g_fonts.getFont(fontName);
     updateText();
     onFontChange(fontName);
+}
+
+void UIWidget::processCodeTags() {
+    std::string tempText = m_text;
+    m_text.clear();
+    m_textEvents.clear();
+
+    std::regex regex(R"(\[text-event\](.*?)\[/text-event\])");
+    std::smatch match;
+
+    while (std::regex_search(tempText, match, regex)) {
+        m_text += tempText.substr(0, match.position());
+
+        std::string word = match[1];
+        size_t startPos = m_text.length();
+        size_t endPos = startPos + word.length();
+
+        m_textEvents.push_back({ word, startPos, endPos });
+        m_text += word;
+        tempText = tempText.substr(match.position() + match.length());
+    }
+    
+    m_text += tempText;
+}
+
+static void buildTextUnderline(Rect& wordRect, CoordsBuffer& textUnderlineCoords) {
+    int currentX = wordRect.x();
+    int y = wordRect.y() + wordRect.height() - 2;
+    while (currentX < wordRect.x() + wordRect.width()) {
+        textUnderlineCoords.addRect(Rect(currentX, y, 2, 2));
+        currentX += 4;
+    }
+
+    if (currentX < wordRect.width()) {
+        textUnderlineCoords.addRect(Rect(currentX, y, std::min<int>(2, wordRect.width() - currentX), 2));
+    }
+}
+
+void UIWidget::updateRectToWord(const std::vector<Rect>& glypsCoords)
+{
+    m_rectToWord.clear();
+    m_textUnderline.clear();
+
+    Rect wordRect;
+    bool inNewLine = false;
+
+    for (const auto& textEvent : m_textEvents) {
+        for (int i = textEvent.startPos; i < textEvent.endPos; ++i) {
+            if (m_drawText[i] == '\n') {
+                m_rectToWord.push_back({ wordRect, textEvent.word });
+                // buildTextUnderline(wordRect, m_textUnderline);
+
+                inNewLine = true;
+                continue;
+            }
+
+            if (i == textEvent.startPos || inNewLine) {
+                wordRect = glypsCoords[i];
+                inNewLine = false;
+            }
+            else
+                wordRect.expand(0, glypsCoords[i].width(), 0, 0);
+        }
+
+        m_rectToWord.push_back({ wordRect, textEvent.word });
+        // buildTextUnderline(wordRect, m_textUnderline);
+    }
 }
