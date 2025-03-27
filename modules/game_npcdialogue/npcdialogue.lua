@@ -20,6 +20,8 @@ local npcMessage = nil
 local hideEvent = nil
 local animateEvent = nil
 
+local canceling = false
+
 local g_console = modules.game_console
 
 function onExtendedOpcode(protocol, code, buffer)
@@ -61,7 +63,7 @@ end
 
 function init()
   connect(g_game, {
-    onGameEnd = NpcDialogue.destroy
+    onGameEnd = NpcDialogue.hide
   })
 
   widget = g_ui.loadUI("npcdialogue", modules.game_interface.getRootPanel())
@@ -84,7 +86,7 @@ end
 
 function terminate()
   disconnect(g_game, {
-    onGameEnd = NpcDialogue.destroy
+    onGameEnd = NpcDialogue.hide
   })
 
   ProtocolGame.unregisterExtendedOpcode(config.opCode)
@@ -94,9 +96,13 @@ end
 local function calculateDialogHeight(text)
 	local maxCharsPerLine = 70
 	local lineHeight = 16
-	local numLines = math.ceil(string.len(text) / maxCharsPerLine)
-	local height = numLines * lineHeight
 
+	local numLines = math.ceil(string.len(text) / maxCharsPerLine)
+  local extraLines = select(2, text:gsub("\n", ""))
+
+  numLines = numLines + extraLines
+
+	local height = numLines * lineHeight
 	return height
 end
 
@@ -115,6 +121,10 @@ end
 
 function NpcDialogue.talk(npcData)
   if not widget then
+    return
+  end
+
+  if canceling then
     return
   end
 
@@ -171,6 +181,8 @@ function NpcDialogue.talk(npcData)
     end
   end
 
+  npcMessage:setPhantom(false)
+
   if not npcMessage:hasEventListener(EVENT_TEXT_CLICK) and not npcMessage:hasEventListener(EVENT_TEXT_HOVER) then
     npcMessage:setEventListener(EVENT_TEXT_CLICK)
     npcMessage:setEventListener(EVENT_TEXT_HOVER)
@@ -196,6 +208,12 @@ function NpcDialogue.cancel()
   end
 
   hideEvent = scheduleEvent(function()
+    if not widget then
+      return
+    end
+
+    npcMessage:setPhantom(true)
+
     if config.fadeEffect then
       if widget:getOpacity() == 1 then
         g_effects.fadeOut(widget)
@@ -227,6 +245,27 @@ function NpcDialogue.runAnimation(message, currentLength, highlightData)
   end
 
   animateEvent = scheduleEvent(function() NpcDialogue.runAnimation(message, currentLength + 1, highlightData) end, config.animateTime)
+end
+
+function NpcDialogue.closeWindow()
+  local npcTab = g_console.consoleTabBar:getTab("NPCs")
+  if npcTab then
+    g_console.sendMessage("Bye", npcTab)
+  end
+
+  NpcDialogue.hide()
+  npcMessage:setPhantom(true)
+
+  canceling = true
+  scheduleEvent(function() canceling = false end, 50)
+end
+
+function NpcDialogue.hide()
+  if config.fadeEffect then
+    widget:setOpacity(0)
+  else
+	  widget:hide()
+  end
 end
 
 function NpcDialogue.destroy()

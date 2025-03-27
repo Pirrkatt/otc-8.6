@@ -7,6 +7,7 @@ UIWindow
   margin-right: 80
   draggable: false
   focusable: false
+  phantom: true
 
   UIWidget
     id: mainPanel
@@ -81,9 +82,22 @@ UIWindow
       color: white
       text-wrap: true
       text-align: topLeft
-      phantom: false
+      phantom: true
       text-style: underline
       anchors.top: parent.top
       anchors.bottom: parent.bottom
       anchors.left: parent.left
       anchors.right: parent.right
+
+  UIWidget
+    id: closeButton
+    size: 14 14
+    image-source: /images/game/npcdialogue/close
+    image-color: white
+    anchors.top: parent.top
+    anchors.right: parent.right
+    margin-top: 35
+    margin-right: 15
+    $hover:
+      image-color: red
+    @onClick: NpcDialogue.closeWindow()
