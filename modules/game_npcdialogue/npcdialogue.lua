@@ -16,11 +16,12 @@ local npcName = nil
 local npcOutfit = nil
 local npcOutfitItem = nil
 local npcMessage = nil
+local closeButton = nil
 
 local hideEvent = nil
 local animateEvent = nil
 
-local canceling = false
+local dialogueActive = false
 
 local g_console = modules.game_console
 
@@ -74,6 +75,7 @@ function init()
   npcOutfit = widget.outfitBox.npcOutfit
   npcOutfitItem = widget.outfitBox.npcOutfitItem
   npcMessage = widget.textPanel.npcText
+  closeButton = widget.closeButton
 
   if config.fadeEffect then
     widget:setOpacity(0)
@@ -124,7 +126,7 @@ function NpcDialogue.talk(npcData)
     return
   end
 
-  if canceling then
+  if not dialogueActive then
     return
   end
 
@@ -172,7 +174,7 @@ function NpcDialogue.talk(npcData)
   end
 
   if config.fadeEffect then
-    if widget:getOpacity() == 0 then
+    if widget:getOpacity() ~= 1 then
       g_effects.fadeIn(widget)
     end
   else
@@ -195,12 +197,18 @@ function NpcDialogue.greet()
     hideEvent:cancel()
     hideEvent = nil
   end
+
+  closeButton:show()
+  dialogueActive = true
 end
 
-function NpcDialogue.cancel()
+function NpcDialogue.cancel(closeInstant)
   if not widget then
     return
   end
+
+  closeButton:hide()
+  dialogueActive = false
 
   if hideEvent then
     hideEvent:cancel()
@@ -215,7 +223,7 @@ function NpcDialogue.cancel()
     npcMessage:setPhantom(true)
 
     if config.fadeEffect then
-      if widget:getOpacity() == 1 then
+      if widget:getOpacity() ~= 0 then
         g_effects.fadeOut(widget)
       end
     else
@@ -225,7 +233,7 @@ function NpcDialogue.cancel()
     end
 
     hideEvent = nil
-  end, 1000 * config.closeTime)
+  end, closeInstant and 0 or 1000 * config.closeTime)
 end
 
 function NpcDialogue.runAnimation(message, currentLength, highlightData)
@@ -248,16 +256,14 @@ function NpcDialogue.runAnimation(message, currentLength, highlightData)
 end
 
 function NpcDialogue.closeWindow()
-  local npcTab = g_console.consoleTabBar:getTab("NPCs")
+  local npcTab = g_console.addTab("NPCs", false)
+  npcTab.npcChat = true
+
   if npcTab then
     g_console.sendMessage("Bye", npcTab)
   end
 
-  NpcDialogue.hide()
-  npcMessage:setPhantom(true)
-
-  canceling = true
-  scheduleEvent(function() canceling = false end, 50)
+  NpcDialogue.cancel(true)
 end
 
 function NpcDialogue.hide()
@@ -279,6 +285,7 @@ function NpcDialogue.destroy()
   npcOutfit = nil
   npcOutfitItem = nil
   npcMessage = nil
+  closeButton = nil
 
   hideEvent = nil
   animateEvent = nil
